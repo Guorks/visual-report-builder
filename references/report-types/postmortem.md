@@ -34,7 +34,7 @@
 | Sev2 | `.badge-gold` (yellow bg) | Partial outage, some users affected |
 | Sev3 | `.badge-green` (green bg) | Minor degradation, internal only |
 
-(Define these inline; they're not in the design-system reference yet.)
+These classes are defined in `references/base-html-template.html` and documented in `references/design-system.md`. Use them directly in the hero.
 
 ## Tone notes
 

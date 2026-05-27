@@ -66,6 +66,7 @@ The base template ships these — use them as-is, don't redefine:
 | `.gotcha` | Red-bordered callout |
 | `.err` | Inline error-code badge |
 | `.tester-pill` | Green pill (used for testers / tags / labels) |
+| `.badge-red` / `.badge-gold` / `.badge-green` | Severity / status badges (use for postmortem Sev1/2/3, status indicators). Round-corner pills, ~12px, uppercase, bold. |
 | `.handwrite` / `.scribble` | Caveat-font accents inline |
 | `.footer` | Page footer with dashed top border |
 

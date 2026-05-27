@@ -1,0 +1,15 @@
+{
+  "prompt": "Postmortem for the 47-minute TikTok OAuth outage on 2026-05-26 caused by misconfigured signing key after rotation, audience engineers, in English.",
+  "expected": {
+    "type": "postmortem",
+    "audience": "engineers",
+    "language": "en",
+    "section_titles_must_include": ["Impact", "Timeline", "Root cause", "Action items"],
+    "image_count_range": [1, 2],
+    "word_count_range": [600, 1800],
+    "required_node_kinds": ["status-panel", "steps", "badge-row"],
+    "tone_must_include_any_of": ["edge function", "secret", "rotation", "outage", "utc"],
+    "tone_must_avoid": ["delightful", "seamless"]
+  },
+  "snapshot_report_json": "../snapshots/postmortem-engineers-en.json"
+}

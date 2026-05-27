@@ -1,6 +1,6 @@
 ---
 name: visual-report-builder
-description: Generate single-file HTML reports for any audience using a locked hand-drawn notebook-sketch design system on cream paper. Use when user asks for a status report, postmortem, kickoff brief, launch announcement, comparison memo, decision memo, or user story (Given/When/Then behavior spec) — especially if they want it to feel hand-crafted, not generic. Generates 2-3 hand-drawn illustrations via Higgsfield MCP (nano_banana_pro) embedded as relative images so the artifact is offline-portable.
+description: Generate single-file HTML reports for any audience using a locked hand-drawn notebook-sketch design system on cream paper. Use when user asks for a status report, postmortem, kickoff brief, launch announcement, comparison memo, decision memo, or user story (Given/When/Then behavior spec) — especially if they want it to feel hand-crafted, not generic. Authoring produces a typed `report.json` IR; the deterministic Node renderer turns it into HTML. Generates hand-drawn illustrations via Higgsfield MCP (nano_banana_pro) with a content-addressable cache so repeat prompts are free.
 ---
 
 # visual-report-builder
@@ -32,13 +32,16 @@ collaboratively-edited surface.
 On every invocation, load:
 
 1. **`references/pipeline.md`** — the 9-step process. This drives everything.
-2. **`references/report-types/<type>.md`** — section recipe for the chosen type.
-3. **`references/audience-modifiers/<audience>.md`** — tone instructions.
+2. **`references/report-types/<type>.md`** — section recipe + schema mapping for the chosen type.
+3. **`references/audience-modifiers/<audience>.md`** — tone instructions + tone fingerprint.
 4. **`references/design-system.md`** — palette + classes (skim).
 5. **`references/image-style-guide.md`** — Higgsfield prompt boilerplate.
+6. **`src/schema.ts`** — typed IR contract you'll emit.
 
-Reference HTML lives at **`references/base-html-template.html`**. The
-canonical example is **`examples/tiktok-status-spanish/`**.
+Reference HTML lives at **`references/base-html-template.html`** (a
+regenerable preview skeleton — actual rendering goes through `bin/render.ts`).
+The canonical example is **`examples/tiktok-status-spanish/`** with its
+`report.json` IR alongside the rendered HTML.
 
 ## Quick start
 
@@ -46,9 +49,9 @@ If the user invocation didn't specify all four, ask via AskUserQuestion
 in one message:
 
 1. **Topic** — what's the report about?
-2. **Audience** — `engineers` / `non-tech` (stakeholders) / `operators` /
+2. **Audience** — `engineers` / `stakeholders-non-tech` / `operators` /
    `investors` / `mixed`
-3. **Language** — `Spanish` (es-LA) or `English` (en-US). Default to
+3. **Language** — `Spanish` (es) or `English` (en). Default to
    the language of the conversation.
 4. **Output path** — default `<cwd>/reports/<slug>.html`. Honor project
    conventions if visible.
@@ -59,29 +62,33 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
 ## The pipeline (summary — full version in references/pipeline.md)
 
 1. Clarify scope (one Q&A round if needed).
-2. Load report-type + audience-modifier + design-system + image-style-guide.
+2. Load report-type + audience-modifier + design-system + image-style-guide + schema.
 3. Plan however many images the report actually needs (no fixed cap — judge by content).
-4. Preflight Higgsfield: `balance` + first `generate_image` with `get_cost: true`.
-5. Generate all images in parallel.
-6. Download to `<output_dir>/assets/`.
-7. Render HTML from `base-html-template.html` + recipe + modifier.
+4. Preflight: check the image cache (`src/observability/cache.ts`), then Higgsfield balance + `get_cost: true` on the first un-cached prompt.
+5. Generate all un-cached images in parallel.
+6. Download to `<output_dir>/assets/`, store in cache via `store(...)`.
+7. Author `report.json` conforming to `src/schema.ts`, then `tsx bin/render.ts report.json`.
 8. `open <output_path>` so the user sees it.
-9. If inside a git repo with a session log, append an entry.
+9. Flush `.cost.json` + `.trace.jsonl`; if inside a git repo with a session log, append an entry.
 
 ## Hard rules
 
+- **The IR is the artifact.** Write `report.json` first; HTML is rendered.
+  Two invocations on the same IR produce byte-identical HTML.
+- **`.strict()` schema.** Unknown fields fail. If you find yourself
+  wanting an escape hatch, add the node type to `src/schema.ts` instead.
 - **One language per report.** No mixed Spanish/English in a single
   output (locale routing happens at invocation, not inside the doc).
-- **Locked design system.** No theme customization in v1. If the user
-  asks for dark mode, point them at the v2 roadmap.
+- **Locked design system.** No theme customization in v2. If the user
+  asks for dark mode, point them at the roadmap.
 - **Let the report decide how many images it needs.** No artificial cap —
   judge by what the content requires. A simple status update might need 2-3;
   a multi-type catalog might need 8+. Each image costs ~2 credits at
-  `nano_banana_pro` 1k 16:9, so be intentional, not stingy.
+  `nano_banana_pro` 1k 16:9, but the cache makes repeat invocations free.
 - **No JavaScript.** Reports are pure HTML + inline CSS. They must work
   offline, in any browser, including ones that block JS.
-- **`translate="no"` on all dynamic text.** Prevents Chrome translator
-  from breaking layout.
+- **`translate="no"` on all dynamic text.** The renderer applies this
+  automatically — you don't have to.
 - **Author = Guorks Labs** on any embedded credits/footer.
 
 ## Failure recovery
@@ -90,19 +97,28 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
   simplify composition (fewer elements) and retry.
 - Out of credits → stop, tell user. Don't downgrade model.
 - `open` failed (no GUI / SSH session) → print path, tell user.
+- Schema validation fails at render → read the zod error path, fix the
+  offending field. Most common: extra unrecognized field on a node.
+- Result feels off → inspect `<output_dir>/.trace.jsonl` and
+  `.cost.json`; run the eval harness if the prompt is in the goldset:
+  `npx tsx bin/eval.ts --filter <slug>`.
 
 ## Reference example
 
 When in doubt about a structural choice, look at:
-`examples/tiktok-status-spanish/tiktok-integracion-estado.html`.
-It is the canonical reference for what a status report (Spanish,
-engineers audience) should look like. If the report you're producing
-deviates from that, have a reason.
+`examples/tiktok-status-spanish/report.json` (the IR) and
+`examples/tiktok-status-spanish/tiktok-integracion-estado.html` (the
+rendered output). The IR is the canonical reference for a status report
+(Spanish, engineers audience). If the report you're producing deviates
+from that, have a reason.
 
 ## Don't
 
-- Don't redefine CSS classes that already exist in `design-system.md`.
+- Don't hand-write HTML; emit `report.json` and let the renderer produce it.
+- Don't redefine CSS classes that already exist in `src/render/css.ts`.
 - Don't generate images before deciding the structure (wastes credits).
 - Don't render code blocks for non-tech audiences (use prose instead).
 - Don't use icon libraries — use unicode glyphs (✓ → 🎉) when needed.
-- Don't add automated tests in v1 — outputs are visual artifacts.
+- Don't add automated tests in your authoring loop — outputs are visual
+  artifacts. The eval harness (`bin/eval.ts`) is the regression net,
+  not unit tests on the prose.

@@ -1,0 +1,15 @@
+{
+  "prompt": "Comparación: Wise vs Tipalti para procesar payouts de operadores. Audience operators, en español.",
+  "expected": {
+    "type": "comparison",
+    "audience": "operators",
+    "language": "es",
+    "section_titles_must_include": ["Resumen", "Comparación", "Recomendación"],
+    "image_count_range": [1, 2],
+    "word_count_range": [500, 1400],
+    "required_node_kinds": ["check-table", "cards-2"],
+    "tone_must_include_any_of": ["operador", "paso", "qué hacer", "cómo"],
+    "tone_must_avoid": ["sinérgico", "estratégico"]
+  },
+  "snapshot_report_json": "../snapshots/comparison-operators-es.json"
+}

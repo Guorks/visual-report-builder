@@ -33,3 +33,13 @@
 Kickoffs are aspirational + grounded. Energy in the hero, realism in
 the risks. Don't promise what you can't measure — every goal in §4
 should be a number or a binary observable state.
+
+## Schema mapping
+
+Map each section in the recipe above to nodes in `src/schema.ts`:
+
+Hero figure = `figure`; motivation = `status-panel`; goals = `done-list`; scope visual = `figure`; plan = `steps`; team = `cards-3`; risks = `gotcha`; decisions made = `card` color=blue; open questions = `pending-list`.
+
+The renderer reads only the IR — never plain prose — so structural
+guarantees (section ordering, required node kinds) hold the moment the
+`report.json` validates against the schema.

@@ -31,3 +31,13 @@ Reader sees the answer first; reasoning is for those who want it.
 Decision memos are confident + transparent. State the decision first
 (§2), then back it up. Don't relitigate — if §2 needs caveats, the
 decision isn't made yet, write a comparison instead.
+
+## Schema mapping
+
+Map each section in the recipe above to nodes in `src/schema.ts`:
+
+Decision panel = `status-panel` with tag "Decision"; hero figure = `figure`; context = `paragraph`; options = `check-table`; tradeoffs = `cards-2`; reversibility = `card`; action items = `pending-list`.
+
+The renderer reads only the IR — never plain prose — so structural
+guarantees (section ordering, required node kinds) hold the moment the
+`report.json` validates against the schema.

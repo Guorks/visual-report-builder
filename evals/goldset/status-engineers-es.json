@@ -1,0 +1,21 @@
+{
+  "prompt": "Estado de la integración TikTok para el equipo de ingeniería de Studio Sharpods, audiencia engineers, en español.",
+  "expected": {
+    "type": "status",
+    "audience": "engineers",
+    "language": "es",
+    "section_titles_must_include": [
+      "Lo que ya está hecho",
+      "Cómo funciona",
+      "Qué sigue",
+      "Gotchas",
+      "Referencia rápida"
+    ],
+    "image_count_range": [2, 3],
+    "word_count_range": [800, 2200],
+    "required_node_kinds": ["status-panel", "check-table", "steps", "gotcha"],
+    "tone_must_include_any_of": ["edge function", "supabase", "commit", "redirect_uri", "scope"],
+    "tone_must_avoid": ["delightful", "powerful", "seamless"]
+  },
+  "snapshot_report_json": "../../examples/tiktok-status-spanish/report.json"
+}

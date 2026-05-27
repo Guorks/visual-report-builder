@@ -10,9 +10,9 @@ using the AskUserQuestion tool:
 
 1. **Topic** — what's the report about? (e.g., "Status of our payments
    integration")
-2. **Audience** — who reads this? Options: `engineers`, `non-tech`,
-   `operators`, `investors`, `mixed`
-3. **Language** — `Spanish` (es-LA) or `English` (en-US). Default
+2. **Audience** — who reads this? Options: `engineers`,
+   `stakeholders-non-tech`, `operators`, `investors`, `mixed`
+3. **Language** — `Spanish` (es) or `English` (en). Default
    Spanish if user is writing in Spanish; otherwise English.
 4. **Output path** — where to write the HTML? Default
    `<cwd>/reports/<slug>.html`. Honor any project conventions if visible
@@ -34,11 +34,11 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous.
 
 In order, read:
 
-1. `references/report-types/<type>.md` — structural recipe (sections + order)
-2. `references/audience-modifiers/<audience>.md` — tone instructions
-3. `references/design-system.md` — palette + classes (skim if already
-   familiar)
+1. `references/report-types/<type>.md` — structural recipe + schema mapping
+2. `references/audience-modifiers/<audience>.md` — tone instructions + tone fingerprint
+3. `references/design-system.md` — palette + classes (skim if already familiar)
 4. `references/image-style-guide.md` — prompt boilerplate + failure modes
+5. `src/schema.ts` — node-type contract for the IR you'll emit in step 7
 
 ## Step 3 — Plan images
 
@@ -48,45 +48,62 @@ explainer might need 8+; a simple status update might need 2-3; a
 decision memo might need 1. Write out each image's prompt mentally
 before generating so you don't waste credits on bad framing.
 
-## Step 4 — Preflight Higgsfield
+## Step 4 — Preflight Higgsfield + check the cache
+
+Before generating, check the local image cache for each planned prompt:
+
+```ts
+import { lookup } from "./src/observability/cache.ts";
+const hit = lookup(fullPrompt, "nano_banana_pro");
+```
+
+On hit: skip Higgsfield, copy the PNG via `copyToOutput(hit.hash, dest)`,
+emit a `image_cache_hit` event to `.trace.jsonl`.
+
+On miss: continue.
 
 ```
 mcp__claude_ai_higgsfield__balance
 ```
-Confirm credits ≥ (2 × number_of_images + 5 safety margin).
+Confirm credits ≥ (2 × number_of_misses + 5 safety margin).
 
 ```
 mcp__claude_ai_higgsfield__generate_image with get_cost: true
 ```
-on the first prompt. Expected: 2 credits at `nano_banana_pro` 1k 16:9.
+on the first un-cached prompt. Expected: 2 credits at `nano_banana_pro` 1k 16:9.
 
 ## Step 5 — Generate all images in parallel
 
-Submit each prompt as a separate `generate_image` call (not `get_cost`).
+Submit each un-cached prompt as a separate `generate_image` call (not `get_cost`).
 Then poll each `job_status` with `sync: true`.
 
-## Step 6 — Download assets
+## Step 6 — Download assets + cache them
 
 `mkdir -p <output_dir>/assets`. For each completed job, `curl` the
 `rawUrl` to `<output_dir>/assets/<descriptive-slug>.png`. Use kebab-case
 slugs that match what the report references.
 
-## Step 7 — Render HTML
+Then call `store(prompt, "nano_banana_pro", assetPath, 2)` so the next
+invocation with the same prompt is a cache hit.
 
-Start with `references/base-html-template.html`. Apply, in order:
+## Step 7 — Author `report.json` and render
 
-1. Substitute the standard placeholders (`{{TITLE}}`, `{{LANG}}`, etc.)
-2. For each section in the report-type recipe, write the section body
-   using the audience-modifier's tone rules.
-3. Embed images via relative paths (`<img src="assets/...">`).
-4. Adjust the `.progress-fill` width if the report type uses a progress
-   bar (status report does; others usually don't — remove the
-   `.status-panel .progress` block if not applicable).
+Write the report as a typed IR file at `<output_dir>/report.json` that
+conforms to `src/schema.ts`. The IR is the artifact you are producing —
+HTML is a pure function of it.
+
+```bash
+npx tsx bin/render.ts <output_dir>/report.json --out <output_dir>/<slug>.html
+```
+
+The renderer is deterministic: same JSON in, byte-identical HTML out.
+It validates the IR against the zod schema. Schema violations exit
+non-zero with the offending path.
 
 Hard rules from the design system:
 - No `any` JS — there is no JS at all. Pure HTML + inline CSS.
 - All dynamic text gets `translate="no"` to prevent Chrome translator
-  from breaking layout.
+  from breaking layout. The renderer adds this automatically.
 - All Spanish strings (or English, etc.) live in the HTML — no localiza-
   tion layer; one report = one language.
 
@@ -97,11 +114,13 @@ open <output_html_path>
 ```
 The user reviews immediately.
 
-## Step 9 — Log
+## Step 9 — Log + flush observability
 
-If the working directory is a git repo and has a `control-center/build-state.md`
-or similar session log, append a one-paragraph entry noting the report
-was generated.
+Write `.cost.json` (CostLedger.flush) and ensure `.trace.jsonl` is
+closed. If the working directory is a git repo and has a
+`control-center/build-state.md` or similar session log, append a
+one-paragraph entry noting the report was generated and citing the
+cost (e.g. "2 cache hits + 1 miss, total 2 credits spent").
 
 ## Errors and recovery
 
@@ -110,4 +129,10 @@ was generated.
 - **No credits:** stop and tell the user. Don't downgrade the model.
 - **`open` failed (no GUI):** print the file path and tell the user
   to open it manually.
+- **Schema validation failed at render:** read the zod error path,
+  inspect the offending field in `report.json`. Most common cause is
+  a node with an extra field — `.strict()` rejects unknown keys.
 - **Output directory doesn't exist:** create it (`mkdir -p`).
+- **Unexpected report quality:** inspect `<output_dir>/.trace.jsonl`
+  for the actual file reads, image-prompt hashes, and durations. Run
+  `npx tsx bin/eval.ts --filter <slug>` if the report is in the goldset.

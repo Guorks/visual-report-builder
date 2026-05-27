@@ -54,3 +54,17 @@ Status report opening for non-tech (for contrast — see
 > **Hero lede:** "La integración con TikTok está lista para pruebas
 > internas; falta confirmar el flujo con una cuenta de prueba real
 > antes de pedir aprobación de TikTok."
+
+## Tone fingerprint
+
+Used by `src/eval/tone.ts` as a structural check on the prose.
+
+```yaml
+tone_must_include_any_of: [edge function, supabase, commit, redirect_uri, scope, schema, migration, pkce, secret, token]
+tone_must_avoid: [delightful, powerful, seamless, exciting, journey, synergy, leverage]
+```
+
+The audience eval passes when the rendered prose includes **at least
+one** include-phrase AND **none** of the avoid-phrases. Adjust these
+lists when the modifier's stylebook genuinely changes; never to silence
+a regression you haven't read.

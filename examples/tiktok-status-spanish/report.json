@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "title": "Estado de la integración TikTok · Studio Sharpods",
+    "language": "es",
+    "type": "status",
+    "audience": "engineers",
+    "date": "Fecha: 2026-05-27",
+    "project": "Proyecto: Studio Sharpods",
+    "extra": "Dominio: sharpods.ai",
+    "footer_lines": [
+      "Studio Sharpods · Informe TikTok · Generado 2026-05-27",
+      "Ilustraciones generadas con Higgsfield (nano_banana_pro) · Diagramas hand-drawn"
+    ]
+  },
+  "hero": {
+    "kicker": "— informe para el equipo —",
+    "h1_pre": "Estado de la",
+    "h1_accent": "integración TikTok",
+    "h1_post": "",
+    "lede": "Resumen visual de dónde estamos con la conexión de cuentas de operadores a TikTok (Login Kit + Display API). La sandbox quedó configurada y guardada; estamos listos para probar el flujo de punta a punta con cuentas de prueba antes de pedir review para producción."
+  },
+  "sections": [
+    {
+      "kind": "figure",
+      "src": "assets/donde-estamos.png",
+      "alt": "Pipeline visual: App creada, Sandbox, Permisos, 3 testers, Probar conexión (paso actual), Producción",
+      "caption": "↑ ¿Dónde estamos? estamos en \"Probar conexión\" — paso 5 de 6."
+    },
+    {
+      "kind": "status-panel",
+      "tag": "Resumen ejecutivo",
+      "heading": "Lista para pruebas en sandbox 🟢",
+      "paragraph": "La integración de TikTok (conectar cuentas de operadores + leer métricas de video vía Display API) está <strong>completamente cableada en sandbox</strong>. Lo que falta es ejecutar la primera prueba con un tester real, validar el flujo, y luego empezar el camino a producción. No hay configuración pendiente del lado de TikTok ni de Supabase para empezar a probar.",
+      "progress": {
+        "pct": 67,
+        "labels": ["App creada", "Sandbox lista", "← AQUÍ · Probar", "Producción"],
+        "note": "del camino completado — la parte técnica pesada ya está hecha. Lo que queda es prueba operacional + revisión de TikTok."
+      }
+    },
+    { "kind": "h2", "text": "Lo que ya está hecho ✓" },
+    {
+      "kind": "paragraph",
+      "body": "Estos puntos fueron verificados contra el repo en este informe — código y configuración están consistentes."
+    },
+    {
+      "kind": "grid-2",
+      "cells": [
+        [
+          { "kind": "h3", "text": "🏢 App + organización en TikTok" },
+          {
+            "kind": "done-list",
+            "items": [
+              "<strong>App \"Studio Sharpods\"</strong> creada · App ID <code>7642759316860291088</code> · tipo \"Other\".",
+              "<strong>Organización \"icunox\"</strong> · Org ID <code>7331505583796896773</code> · entidad US, ya activa.",
+              "Categoría, descripción, ToS / Privacy / Website · todos apuntando a <code>sharpods.ai</code>."
+            ]
+          }
+        ],
+        [
+          { "kind": "h3", "text": "🧪 Sandbox configurada y guardada" },
+          {
+            "kind": "done-list",
+            "items": [
+              "<strong>Sandbox</strong> · ID <code>7642759316860307472</code> · <strong>\"Studio Sharpods Sandbox\"</strong>.",
+              "<strong>Login Kit</strong> habilitado.",
+              "<strong>4 scopes</strong> configurados (ver tabla abajo).",
+              "<strong>3 testers</strong> en la lista de Target Users."
+            ]
+          }
+        ]
+      ]
+    },
+    {
+      "kind": "card",
+      "color": "green",
+      "title": "🔐 Backend en Supabase (también listo)",
+      "body": "<ul style=\"margin-bottom: 0;\"><li><strong><code>verify_jwt = false</code></strong> en <code>tiktok-oauth-callback</code> · necesario porque TikTok redirige al callback como un navegador sin sesión.</li><li><strong><code>tiktok-oauth-init</code></strong> sigue con JWT activo · solo lo llama el frontend autenticado.</li><li><strong>5 secretos</strong> seteados en <em>Edge Functions → Secrets</em>: <code>TIKTOK_CLIENT_KEY</code>, <code>TIKTOK_CLIENT_SECRET</code>, <code>TIKTOK_REDIRECT_URI</code>, <code>OAUTH_STATE_SIGNING_KEY</code>, <code>TOKEN_ENCRYPTION_MASTER_KEY</code>.</li><li><strong>PKCE</strong> agregado al flow (LV-005) · tabla <code>tiktok_oauth_states</code> con state UUID + code_verifier de un solo uso (10 min de vida).</li><li><strong>3 edge functions</strong> deployeadas: <code>tiktok-oauth-init</code>, <code>tiktok-oauth-callback</code>, <code>tiktok-sync-account</code>.</li></ul>"
+    },
+    { "kind": "h2", "text": "Cómo funciona el login (visual)" },
+    {
+      "kind": "paragraph",
+      "body": "Este es el camino completo que recorre el operador al apretar \"Conectar TikTok\". Cada flecha es una transición de página o una llamada HTTP."
+    },
+    {
+      "kind": "figure",
+      "src": "assets/como-funciona-login.png",
+      "alt": "Flujo OAuth: persona → App Sharpods (botón Conectar TikTok) → TikTok → Supabase → Cuenta conectada",
+      "caption": "↑ Operador → \"Conectar TikTok\" → TikTok → callback en Supabase → cuenta guardada"
+    },
+    {
+      "kind": "steps",
+      "items": [
+        {
+          "title": "Operador hace clic en \"Conectar TikTok\"",
+          "body": "Componente <code>ConnectTikTokButton.tsx</code> llama <code>tiktok-oauth-init</code>.",
+          "small": "JWT requerido · operador autenticado en Supabase"
+        },
+        {
+          "title": "Frontend recibe authorize URL + state UUID",
+          "body": "El edge function genera un par PKCE (code_verifier + code_challenge), inserta una fila en <code>tiktok_oauth_states</code> (vive 10 min), y arma la URL hacia TikTok con <code>code_challenge_method=S256</code>.",
+          "small": "Browser redirige a TikTok"
+        },
+        {
+          "title": "El operador aprueba los permisos en TikTok",
+          "body": "Solo funciona si su cuenta está en la lista de 3 testers (ver abajo). Los scopes que se solicitan son <code>user.info.basic</code>, <code>user.info.profile</code>, <code>user.info.stats</code>, <code>video.list</code>.",
+          "small": "Sandbox = solo testers aprobados pueden completar el flujo"
+        },
+        {
+          "title": "TikTok redirige al callback con un code",
+          "body": "El callback (<code>tiktok-oauth-callback</code>) busca el state en la tabla, lo borra (single-use), y cambia el <code>code</code> por tokens reales usando el <code>code_verifier</code>.",
+          "small": "No requiere JWT · TikTok llega como browser anónimo"
+        },
+        {
+          "title": "Tokens se encriptan y la cuenta se guarda",
+          "body": "Los tokens se cifran con AES-256-GCM + HKDF derivado por operador (master key en Supabase secrets). Se hace upsert en <code>social_accounts</code> con <code>UNIQUE(platform, platform_user_id)</code>.",
+          "small": "Sin tokens en claro en ningún lado"
+        },
+        {
+          "title": "Browser termina en /operator/social-accounts?connected=true&account_id=…",
+          "body": "La página lee el query param, muestra toast de éxito, y la cuenta aparece en la lista vía realtime.",
+          "small": "Listo · operador conectado · ya puede usar \"Sync Now\""
+        }
+      ]
+    },
+    { "kind": "h2", "text": "Tabla de consistencia — tres piezas deben coincidir" },
+    {
+      "kind": "paragraph",
+      "body": "El error <strong>más común</strong> en OAuth es que el redirect URI registrado en TikTok no coincida exactamente con el secret <code>TIKTOK_REDIRECT_URI</code> ni con la URL real del edge function. Si una sola letra difiere → <code>redirect_uri_mismatch</code> y todo falla."
+    },
+    {
+      "kind": "check-table",
+      "headers": ["Pieza", "Dónde vive", "Valor"],
+      "rows": [
+        ["Redirect URI", "TikTok Developer Console · Sandbox", "<code>https://mxalbyzxfnfmrygpbstp.supabase.co/functions/v1/tiktok-oauth-callback</code>"],
+        ["<code>TIKTOK_REDIRECT_URI</code> secret", "Supabase · Edge Functions → Secrets", "<code>https://mxalbyzxfnfmrygpbstp.supabase.co/functions/v1/tiktok-oauth-callback</code>"],
+        ["Edge Function URL real", "Supabase · funciones desplegadas", "<code>https://mxalbyzxfnfmrygpbstp.supabase.co/functions/v1/tiktok-oauth-callback</code>"],
+        ["Scopes registrados", "TikTok Console · Sandbox · Login Kit", "<code>user.info.basic</code>, <code>user.info.profile</code>, <code>user.info.stats</code>, <code>video.list</code>"],
+        ["Scopes en código", "<code>tiktok-oauth-init/index.ts:10</code>", "<code>user.info.basic</code>, <code>user.info.profile</code>, <code>user.info.stats</code>, <code>video.list</code> <span class=\"match\">← idénticos ✓</span>"]
+      ]
+    },
+    { "kind": "h2", "text": "Qué sigue 🔜" },
+    {
+      "kind": "card",
+      "color": "yellow",
+      "title": "1) Prueba end-to-end en sandbox (hacer hoy)",
+      "body": "<span>Ir a <code>/operator/social-accounts</code> → \"Conectar TikTok\" → login con uno de los testers → ver la cuenta conectada en la lista. <strong>Si esto funciona, la integración está validada.</strong></span><br><br><strong>Testers habilitados:</strong><br><br><span class=\"tester-pill\">felipesharpods</span> <span class=\"tester-pill\">undineroextra</span> <span class=\"tester-pill\">felipeguorks</span><br><br><span style=\"font-size: 13px;\">Solo estas tres cuentas pueden completar el OAuth en sandbox. Si alguien intenta con otra cuenta, TikTok rechaza el login.</span>"
+    },
+    { "kind": "h3", "text": "Si algo falla — códigos de error del callback" },
+    {
+      "kind": "paragraph",
+      "body": "El callback siempre redirige a <code>/operator/social-accounts</code> con <code>?error=&lt;code&gt;</code> cuando algo se rompe. Cuando vean uno, crucen referencia con <code>supabase/functions/tiktok-oauth-callback/index.ts</code> y los logs de Supabase:"
+    },
+    {
+      "kind": "paragraph",
+      "body": "<span class=\"err\">token_exchange_failed</span> <span class=\"err\">state_mismatch</span> <span class=\"err\">user_info_fetch_failed</span> <span class=\"err\">duplicate_account</span> <span class=\"err\">tiktok_app_not_configured</span> <span class=\"err\">internal_error</span>"
+    },
+    { "kind": "h2", "text": "Sandbox vs Producción" },
+    {
+      "kind": "paragraph",
+      "body": "Ya estamos parados en sandbox. El camino a producción es separado y empieza solo cuando la sandbox esté validada."
+    },
+    {
+      "kind": "figure",
+      "src": "assets/sandbox-vs-produccion.png",
+      "alt": "Comparación visual: Sandbox listo ya, 3 testers, probar hoy · Producción requiere icono real, verificar dominio, review TikTok",
+      "caption": "↑ Dos caminos: lo que tenemos vs lo que falta para producción."
+    },
+    {
+      "kind": "cards-2",
+      "cards": [
+        {
+          "color": "green",
+          "title": "🟢 Sandbox · ahora",
+          "body": "<ul style=\"margin-bottom: 0;\"><li>Login funciona ya con los 3 testers.</li><li>Token exchange, sync, storage — todo activo.</li><li>Datos reales de TikTok (los videos de los testers).</li><li>Sin esperas, sin review.</li></ul>"
+        },
+        {
+          "color": "red",
+          "title": "🔴 Producción · después",
+          "body": "<ul style=\"margin-bottom: 0;\"><li><strong>Subir icono de marca real</strong> (no el placeholder).</li><li><strong>Verificar el dominio <code>sharpods.ai</code></strong> en TikTok URL Properties.</li><li>Re-agregar productos + scopes en la pestaña <em>Production</em>.</li><li><strong>Submit for review</strong> · ~5-15 días hábiles de espera.</li></ul>"
+        }
+      ]
+    },
+    { "kind": "h2", "text": "Gotchas para tener en mente" },
+    {
+      "kind": "gotcha",
+      "title": "TikTok rechaza localhost.",
+      "body": "Por eso el redirect URI es la URL del edge function de Supabase, no una página del frontend. TikTok exige HTTPS y dominio público para todas las URLs de OAuth."
+    },
+    {
+      "kind": "gotcha",
+      "title": "Sandbox y producción usan credenciales distintas.",
+      "body": "El <code>TIKTOK_CLIENT_KEY</code> que tenemos en Supabase ahora mismo es el de sandbox (<code>sbawav4p7sbhufhxd1</code>). Cuando aprueben producción, hay que <em>swapear</em> al client key + secret de producción. No mezclar."
+    },
+    {
+      "kind": "gotcha",
+      "title": "El form de producción no tiene \"guardar como borrador\".",
+      "body": "No se puede ir llenando de a poco — TikTok rechaza el submit si falta algo. Llenar todo de una sola sentada cuando estemos listos."
+    },
+    {
+      "kind": "gotcha",
+      "title": "El webhook authorization.removed está pendiente.",
+      "body": "Cuando un operador revoca el acceso desde TikTok, deberíamos marcarle la cuenta como <code>revoked</code>. Aún no está cableado (SDD §6.7.5C). Lo trabajamos después de validar el flujo principal."
+    },
+    { "kind": "h2", "text": "Referencia rápida" },
+    {
+      "kind": "check-table",
+      "headers": ["Clave", "Valor"],
+      "rows": [
+        ["TikTok App ID", "<code>7642759316860291088</code>"],
+        ["Organización (icunox) ID", "<code>7331505583796896773</code>"],
+        ["Sandbox ID", "<code>7642759316860307472</code>"],
+        ["Sandbox Client Key (público)", "<code>sbawav4p7sbhufhxd1</code>"],
+        ["Supabase Project Ref", "<code>mxalbyzxfnfmrygpbstp</code>"],
+        ["Dominio", "<code>sharpods.ai</code>"],
+        ["Sandbox Testers", "<code>felipesharpods</code>, <code>undineroextra</code>, <code>felipeguorks</code>"],
+        ["Scopes", "<code>user.info.basic</code>, <code>user.info.profile</code>, <code>user.info.stats</code>, <code>video.list</code>"]
+      ]
+    },
+    { "kind": "scribble", "text": "~ archivos clave en el repo: ~" },
+    {
+      "kind": "pre",
+      "body": "supabase/functions/tiktok-oauth-init/index.ts        ← arma authorize URL + PKCE\nsupabase/functions/tiktok-oauth-callback/index.ts    ← exchange code → tokens → upsert cuenta\nsupabase/functions/tiktok-sync-account/index.ts      ← pulls últimos N videos\nsupabase/functions/_shared/tiktok-client.ts          ← wrapper tipado del TikTok API\nsrc/pages/operator/SocialAccountsPage.tsx            ← lista de cuentas conectadas\nsrc/pages/operator/TikTokCallback.tsx                ← landing post-OAuth\nsrc/components/operator/ConnectTikTokButton.tsx      ← el botón \"Conectar TikTok\"\nsrc/services/social-accounts-service.ts              ← service layer (USE_MOCK = true por ahora)"
+    },
+    { "kind": "scribble", "text": "— ¡a probar! 🚀 —" }
+  ]
+}

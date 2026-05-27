@@ -73,3 +73,17 @@ Postmortem impact panel for engineers (for contrast):
 > mis-set `OAUTH_STATE_SIGNING_KEY` after secret rotation. Existing
 > `social_accounts` unaffected (no token rotation in window).
 > Auth failure rate: 100% during window. No data loss."
+
+## Tone fingerprint
+
+Used by `src/eval/tone.ts` as a structural check on the prose.
+
+```yaml
+tone_must_include_any_of: [users, operators, team, customers, business, impact, benefit, ready]
+tone_must_avoid: [edge function, schema, commit sha, pkce, hkdf, rls, jwt]
+```
+
+The audience eval passes when the rendered prose includes **at least
+one** include-phrase AND **none** of the avoid-phrases. Adjust these
+lists when the modifier's stylebook genuinely changes; never to silence
+a regression you haven't read.

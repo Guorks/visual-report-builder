@@ -31,3 +31,13 @@
 Comparisons should *recommend*, not just enumerate. §6 must take a
 position. Don't hedge — if both options were equal, you wouldn't be
 writing this. State the recommendation, then explain.
+
+## Schema mapping
+
+Map each section in the recipe above to nodes in `src/schema.ts`:
+
+Fork figure = `figure`; resumen = `status-panel`; criteria = `check-table`; side-by-side = `cards-2` color green/red; recommendation = `card` color=purple or yellow; justification = `paragraph`; risks = `gotcha`; open questions = `pending-list`.
+
+The renderer reads only the IR — never plain prose — so structural
+guarantees (section ordering, required node kinds) hold the moment the
+`report.json` validates against the schema.

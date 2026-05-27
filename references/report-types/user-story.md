@@ -50,3 +50,13 @@ everything else is supporting detail. Don't write user stories for
 features that don't have a specific user-observable trigger. If you
 can't fill in `When:` with a concrete user action or system event,
 write a kickoff or launch instead.
+
+## Schema mapping
+
+Map each section in the recipe above to nodes in `src/schema.ts`:
+
+Hero figure = `figure`; given/when/then = `cards-3` with neutral color; behavior = `steps`; before/after = `figure`; acceptance = `done-list`; edge cases = `gotcha`; out-of-scope = `card` color=neutral; implementation notes = `paragraph` or `pre`.
+
+The renderer reads only the IR — never plain prose — so structural
+guarantees (section ordering, required node kinds) hold the moment the
+`report.json` validates against the schema.

@@ -1,6 +1,6 @@
 {
   "name": "visual-report-builder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Generate hand-drawn HTML reports for any audience — status, postmortem, kickoff, launch, comparison, decision memo, user story.",
   "publisher": "Guorks Labs",
   "license": "MIT",

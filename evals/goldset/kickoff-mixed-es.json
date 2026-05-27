@@ -1,0 +1,15 @@
+{
+  "prompt": "Kickoff brief para el proyecto Pact — sistema de pagos vía Wise para operadores, audience mixed, en español.",
+  "expected": {
+    "type": "kickoff",
+    "audience": "mixed",
+    "language": "es",
+    "section_titles_must_include": ["Por qué", "Objetivos", "Plan", "Riesgos"],
+    "image_count_range": [1, 2],
+    "word_count_range": [600, 1600],
+    "required_node_kinds": ["status-panel", "steps"],
+    "tone_must_include_any_of": ["objetivo", "equipo", "alcance", "plan"],
+    "tone_must_avoid": ["asombroso", "increíble"]
+  },
+  "snapshot_report_json": "../snapshots/kickoff-mixed-es.json"
+}

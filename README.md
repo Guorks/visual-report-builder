@@ -7,6 +7,12 @@ hand-drawn illustrations.
 
 Built by [Guorks Labs](https://github.com/guorks).
 
+**v0.2 (this branch):** authoring produces a typed `report.json` IR;
+the deterministic Node renderer (`bin/render.ts`) turns it into HTML.
+An eval harness (`bin/eval.ts`) grades the IR with structural, tone,
+and optional LLM-as-judge checks. Image generation is backed by a
+content-addressable cache so repeat prompts are free.
+
 ![hero example](examples/tiktok-status-spanish/assets/donde-estamos.png)
 
 ## What it does
@@ -94,9 +100,23 @@ The same content gets re-toned per audience:
 
 - Claude Code with the [Higgsfield MCP](https://higgsfield.ai) connected
   (the skill uses `nano_banana_pro` for illustrations).
-- ~6 Higgsfield credits per report (2 credits × 3 images at 1k 16:9).
+- Node ≥ 20 with `npm` for the renderer + eval harness.
+- ~6 Higgsfield credits for a first invocation; repeats with the same
+  prompts cost 0 credits via the content-addressable cache.
 - A working `open` command (or you'll need to open the file path
   manually — the skill prints it).
+- **Optional:** `ANTHROPIC_API_KEY` to run the LLM-as-judge eval mode
+  (`npx tsx bin/eval.ts --judge`). Structural + tone checks run fine
+  without it.
+
+## Developer setup
+
+```bash
+npm install
+npm test                    # XSS / escape regression
+npx tsx bin/render.ts examples/tiktok-status-spanish/report.json
+npx tsx bin/eval.ts         # structural + tone over the goldset
+```
 
 ## Examples
 
@@ -106,25 +126,32 @@ The same content gets re-toned per audience:
 
 ## What's locked vs flexible
 
-**Locked (no customization in v1):**
+**Locked (no customization in v2):**
 - The hand-drawn cream/sketch design system
 - Outfit / Inter / Caveat / JetBrains Mono fonts
 - Higgsfield as the image provider
 - Single-file HTML output
+- The IR schema (`src/schema.ts`) — node kinds are fixed; extend by
+  adding a new typed node, not by smuggling raw HTML
 
 **Flexible:**
 - Report type + audience + language (the 3 axes you pick at invocation)
 - Number of sections (each report type has a recipe but you can omit
   sections if the content isn't there)
 - Section content + tone (audience modifier handles)
+- Image cache location (`VRB_CACHE_DIR` env var)
 
 ## Roadmap
 
-- **v0.1 (now):** 7 report types × 5 audiences × 2 languages = 70 covered
+- **v0.1:** 7 report types × 5 audiences × 2 languages = 70 covered
   combinations.
-- **v0.2 (maybe):** Dark mode / alt themes. More languages. PDF export.
+- **v0.2 (this branch):** Typed IR + deterministic renderer + zod
+  schema + eval harness (structural / tone / LLM judge) + image-prompt
+  cache + cost ledger + trace log.
+- **v0.3 (next):** Dark mode / alt themes. More languages. PDF export.
+  Pixel-diff snapshot tests once themes ship.
 - **v1.0 (eventually):** Customizable design tokens, plugin-installable
-  components, automated visual regression tests.
+  components.
 
 ## License
 

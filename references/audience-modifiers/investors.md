@@ -49,3 +49,17 @@ Status report executive panel for investors:
 > "Q2 cierra al 67% del plan: 84 operadores activos (+34% MoM), $4,200
 > MRR (+28% MoM), churn 6% (-2pp vs Q1). TikTok integration ships
 > esta semana — desbloquea el segmento UGC ($120k TAM en LATAM)."
+
+## Tone fingerprint
+
+Used by `src/eval/tone.ts` as a structural check on the prose.
+
+```yaml
+tone_must_include_any_of: [operators, revenue, growth, milestone, tam, market, mrr, payback]
+tone_must_avoid: [debugged, edge function, schema, commit sha]
+```
+
+The audience eval passes when the rendered prose includes **at least
+one** include-phrase AND **none** of the avoid-phrases. Adjust these
+lists when the modifier's stylebook genuinely changes; never to silence
+a regression you haven't read.

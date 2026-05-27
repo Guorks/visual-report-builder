@@ -1,19 +1,4 @@
-<!--
-  GENERATED FILE — do not edit by hand.
-  Source of truth: src/render/{css,layout,primitives}.ts.
-  Regenerate via: npm run regenerate-template
-  This file is kept as a browser-previewable skeleton with {{}} placeholders.
--->
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{TITLE}}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>:root {
+export const CSS = `:root {
   --paper: #F7F3E6;
   --paper-deep: #EFE8D4;
   --ink: #2a2620;
@@ -236,7 +221,7 @@ li strong { color: var(--ink); }
   color: var(--ink);
 }
 .done-list li::before {
-  content: "\2713";
+  content: "\\2713";
   position: absolute;
   left: 14px; top: 50%;
   transform: translateY(-50%);
@@ -259,7 +244,7 @@ li strong { color: var(--ink); }
   position: relative;
 }
 .pending-list li::before {
-  content: "\2192";
+  content: "\\2192";
   position: absolute;
   left: 14px; top: 50%;
   transform: translateY(-50%);
@@ -394,17 +379,4 @@ li strong { color: var(--ink); }
   font-size: 18px;
   transform: rotate(-2deg);
   display: inline-block;
-}</style>
-</head>
-<body>
-<div class="wrap">
-<header class="hero"><div class="kicker" translate="no">{{KICKER}}</div><h1 translate="no">{{H1_PRE}} <span style="color: var(--purple)" translate="no">{{H1_ACCENT}}</span> {{H1_POST}}</h1><p class="lede" translate="no">{{LEDE}}</p><div class="meta-row"><span translate="no">{{META_DATE}}</span><span>·</span><span translate="no">{{META_PROJECT}}</span><span>·</span><span translate="no">{{META_EXTRA}}</span></div></header>
-<div class="figure"><img src="assets/{{HERO_IMAGE}}" alt="{{HERO_IMAGE_ALT}}"><div class="caption" translate="no">{{HERO_CAPTION}}</div></div>
-<div class="status-panel"><div class="tag" translate="no">{{EXEC_TAG}}</div><h2 translate="no">{{EXEC_HEADING}}</h2><p translate="no">{{EXEC_PARAGRAPH}}</p><div class="progress"><div class="progress-track"><div class="progress-fill" style="width: 50%"></div></div><div class="progress-labels"><span translate="no">{{LABEL_1}}</span><span translate="no">{{LABEL_2}}</span><span translate="no">{{LABEL_3}}</span><span translate="no">{{LABEL_4}}</span></div></div><p style="margin-top: 14px; font-size: 13px;" translate="no"><span class="handwrite" style="font-size: 18px;">≈ 50%</span> {{EXEC_PROGRESS_NOTE}}</p></div>
-<h2 translate="no">{{SECTION_1_TITLE}}</h2>
-<h2 translate="no">{{SECTION_2_TITLE}}</h2>
-<h2 translate="no">{{SECTION_3_TITLE}}</h2>
-<div class="footer"><p translate="no">{{FOOTER_LINE_1}}</p><p translate="no">{{FOOTER_LINE_2}}</p><p translate="no">{{FOOTER_LINE_3}}</p></div>
-</div>
-</body>
-</html>
+}`;

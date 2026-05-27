@@ -122,3 +122,31 @@ whitespace. 16:9 aspect ratio.
 ```
 
 That generation succeeded in one pass.
+
+## Cost ledger + cache (v0.2)
+
+Every invocation writes two observability files next to the output HTML:
+
+- `.trace.jsonl` — newline-delimited events: `image_prompt_built`,
+  `image_cache_hit`, `image_cache_miss`, `higgsfield_call`,
+  `higgsfield_cost`, `higgsfield_retry`, `render_done`.
+- `.cost.json` — aggregated credit cost for the session:
+  ```json
+  { "total_credits": 4, "cache_hits": 1, "cache_misses": 2, "credits_by_prompt": [...] }
+  ```
+
+The cache is content-addressable: same boilerplate + composition +
+closer = same SHA-256 = cache hit, $0 cost. Lives in
+`~/.cache/visual-report-builder/` (override with `VRB_CACHE_DIR`).
+
+Use the CLI to inspect:
+
+```bash
+npx tsx bin/cache.ts info
+npx tsx bin/cache.ts list
+npx tsx bin/cache.ts prune --max-age-days 30
+```
+
+Iterating on a prompt no longer costs full freight. If you regenerate
+an image because the first crop was bad, only the new prompt variants
+hit Higgsfield — the others land via cache.

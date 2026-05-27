@@ -31,3 +31,13 @@ Launches are celebratory + clear. Don't lose the "what is it" in the
 celebration. §3 must be readable by someone who didn't know this
 project existed. §4 makes the case for caring. §6 makes it easy to
 try.
+
+## Schema mapping
+
+Map each section in the recipe above to nodes in `src/schema.ts`:
+
+Hero = `figure`; what-is-it = `status-panel`; why-it-matters = `cards-3` (user/business/market); how-it-works = `figure` + `steps`; CTA = `card` color=purple; behind-the-scenes = `paragraph` + optional `cards-3`; credits = `cards-3`.
+
+The renderer reads only the IR — never plain prose — so structural
+guarantees (section ordering, required node kinds) hold the moment the
+`report.json` validates against the schema.

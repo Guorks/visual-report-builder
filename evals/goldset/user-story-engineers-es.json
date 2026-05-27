@@ -1,0 +1,15 @@
+{
+  "prompt": "User story: cuando el operador cruza 1,000 vistas, mostrar confetti + toast. Audience engineers, en español.",
+  "expected": {
+    "type": "user-story",
+    "audience": "engineers",
+    "language": "es",
+    "section_titles_must_include": ["Given", "When", "Then", "Criterios"],
+    "image_count_range": [1, 2],
+    "word_count_range": [400, 1200],
+    "required_node_kinds": ["cards-3", "done-list", "gotcha"],
+    "tone_must_include_any_of": ["componente", "trigger", "estado", "evento"],
+    "tone_must_avoid": ["mágico", "delightful"]
+  },
+  "snapshot_report_json": "../snapshots/user-story-engineers-es.json"
+}

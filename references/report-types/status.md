@@ -41,3 +41,13 @@
 Status reports are reassuring + precise. Lead with the good news (what
 works), then what's next, then risks. Don't bury the lede — the executive
 panel is the headline.
+
+## Schema mapping
+
+Map each section in the recipe above to nodes in `src/schema.ts`:
+
+Hero figure = `figure`; executive panel = `status-panel`; done lists in grid = `grid-2` cells of `h3` + `done-list`; supporting card = `card` color=green; flow = `steps`; consistency = `check-table`; next steps = `card` color=yellow; comparison = `cards-2` with green/red colors; gotchas = `gotcha`; quick reference = `check-table`; file paths = `pre`.
+
+The renderer reads only the IR — never plain prose — so structural
+guarantees (section ordering, required node kinds) hold the moment the
+`report.json` validates against the schema.

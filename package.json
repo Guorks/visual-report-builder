@@ -1,0 +1,27 @@
+{
+  "name": "visual-report-builder",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Hand-drawn HTML report builder — typed IR, deterministic renderer, eval harness.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "render": "tsx bin/render.ts",
+    "eval": "tsx bin/eval.ts",
+    "cache": "tsx bin/cache.ts",
+    "test": "node --import tsx --test src/render/__tests__/*.test.ts",
+    "regenerate-template": "tsx bin/regenerate-template.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.0",
+    "tsx": "^4.20.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

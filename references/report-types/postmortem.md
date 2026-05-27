@@ -42,3 +42,13 @@ Honest, blame-free, action-oriented. State facts. Lead with impact (so
 the reader knows immediately if this affected them). The "what went
 poorly" card should be specific, not vague — name the mistake without
 naming individuals.
+
+## Schema mapping
+
+Map each section in the recipe above to nodes in `src/schema.ts`:
+
+Severity badge = `badge-row`; impact panel = `status-panel` (red-tinted via tag wording); timeline = `steps` with `small` for HH:MM; root cause = `paragraph` + optional `figure`; went well/poorly = `cards-2` green/red; action items = `pending-list`; lessons = `handwrite` or `scribble`; quick reference = `check-table`.
+
+The renderer reads only the IR — never plain prose — so structural
+guarantees (section ordering, required node kinds) hold the moment the
+`report.json` validates against the schema.

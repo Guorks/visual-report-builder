@@ -1,0 +1,17 @@
+{
+  "name": "visual-report-builder",
+  "version": "0.1.0",
+  "description": "Generate hand-drawn HTML reports for any audience — status, postmortem, kickoff, launch, comparison, decision memo, user story.",
+  "publisher": "Guorks Labs",
+  "license": "MIT",
+  "homepage": "https://github.com/guorks/visual-report-builder",
+  "skills": [
+    {
+      "name": "visual-report-builder",
+      "path": "SKILL.md"
+    }
+  ],
+  "requirements": {
+    "mcp": ["claude_ai_higgsfield"]
+  }
+}

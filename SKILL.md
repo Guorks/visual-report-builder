@@ -60,7 +60,7 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
 
 1. Clarify scope (one Q&A round if needed).
 2. Load report-type + audience-modifier + design-system + image-style-guide.
-3. Plan 2-3 images (no more than 4).
+3. Plan however many images the report actually needs (no fixed cap — judge by content).
 4. Preflight Higgsfield: `balance` + first `generate_image` with `get_cost: true`.
 5. Generate all images in parallel.
 6. Download to `<output_dir>/assets/`.
@@ -74,8 +74,10 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
   output (locale routing happens at invocation, not inside the doc).
 - **Locked design system.** No theme customization in v1. If the user
   asks for dark mode, point them at the v2 roadmap.
-- **2-3 images preferred, hard cap 4.** Each image costs ~2 credits and
-  adds visual load.
+- **Let the report decide how many images it needs.** No artificial cap —
+  judge by what the content requires. A simple status update might need 2-3;
+  a multi-type catalog might need 8+. Each image costs ~2 credits at
+  `nano_banana_pro` 1k 16:9, so be intentional, not stingy.
 - **No JavaScript.** Reports are pure HTML + inline CSS. They must work
   offline, in any browser, including ones that block JS.
 - **`translate="no"` on all dynamic text.** Prevents Chrome translator

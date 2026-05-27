@@ -42,9 +42,11 @@ In order, read:
 
 ## Step 3 — Plan images
 
-The report-type file specifies how many images and what they show. Write
-out each image's prompt mentally before generating. Aim 2-3 images. Hard
-cap 4.
+The report-type file suggests typical image needs. **There is no fixed
+cap** — pick the number the report actually requires. A multi-type
+explainer might need 8+; a simple status update might need 2-3; a
+decision memo might need 1. Write out each image's prompt mentally
+before generating so you don't waste credits on bad framing.
 
 ## Step 4 — Preflight Higgsfield
 

@@ -2,7 +2,12 @@
 
 All images for a visual-report-builder report come from the Higgsfield MCP
 using model `nano_banana_pro` at 16:9 aspect ratio. Cost is ~2 credits per
-image at 1k resolution. Plan 2-3 images per report — no more, rarely fewer.
+image at 1k resolution.
+
+**Let the report decide how many images it needs.** No fixed cap — a
+status update might need 2-3; a multi-type explainer might need 8+; a
+single-decision memo might need 1. Judge by what the content requires.
+Be intentional, not stingy, not bloated.
 
 ## The boilerplate prompt (always prepend)
 
@@ -57,8 +62,9 @@ clean composition, lots of whitespace. 16:9 aspect ratio.
 
 - **Long text → garbled.** Hard cap: 3 words per label. If you need
   precise text, put it in the HTML, not the image.
-- **More than 4 images per report.** Cognitive load + cost. 2-3 is the
-  sweet spot.
+- **Images for the sake of images.** Each image should earn its space.
+  If a section is already clear from prose + a table, don't add a
+  decorative image. Cost adds up.
 - **Forgetting `aspect_ratio: "16:9"`** in the API call. Defaults to 1:1
   and the HTML layout breaks (the figure becomes too tall).
 - **Using `nano_banana` (no `_pro` suffix).** Lower quality, blurry text.

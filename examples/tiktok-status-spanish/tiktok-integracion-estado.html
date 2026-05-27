@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="es-LA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estado de la integración TikTok · Studio Sharpods</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #F7F3E6;
+      --paper-deep: #EFE8D4;
+      --ink: #2a2620;
+      --ink-soft: #5a5246;
+      --ink-muted: #8a8170;
+      --line: #d9cfb8;
+      --green: #7ba87b;
+      --green-soft: #d4e3c9;
+      --red: #d97a6c;
+      --red-soft: #f3d5cc;
+      --blue: #7da3c4;
+      --blue-soft: #d3e0eb;
+      --purple: #9b8bc4;
+      --purple-soft: #ddd3ea;
+      --yellow: #e5b96a;
+      --yellow-soft: #f5e5b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      background-image:
+        radial-gradient(ellipse at 15% 5%, rgba(155,139,196,0.07), transparent 40%),
+        radial-gradient(ellipse at 90% 95%, rgba(123,168,123,0.07), transparent 40%);
+    }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 56px 28px 96px; }
+
+    h1, h2, h3 {
+      font-family: 'Outfit', sans-serif;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    h1 { font-size: clamp(36px, 5vw, 52px); line-height: 1.05; font-weight: 700; }
+    h2 { font-size: 28px; font-weight: 700; margin: 56px 0 16px; display: flex; align-items: center; gap: 14px; }
+    h2::before {
+      content: ""; display: inline-block;
+      width: 36px; height: 4px;
+      background: var(--ink);
+      border-radius: 4px;
+    }
+    h3 { font-size: 19px; font-weight: 600; margin: 24px 0 10px; }
+    p { color: var(--ink-soft); margin-bottom: 14px; }
+    p strong { color: var(--ink); font-weight: 600; }
+    .handwrite { font-family: 'Caveat', cursive; font-weight: 700; color: var(--ink); }
+
+    a { color: var(--purple); text-decoration: none; border-bottom: 1px solid var(--purple-soft); }
+    a:hover { border-bottom-color: var(--purple); }
+
+    code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12.5px;
+      background: var(--paper-deep);
+      border: 1px solid var(--line);
+      padding: 2px 7px;
+      border-radius: 5px;
+      color: var(--ink);
+    }
+    pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      background: var(--paper-deep);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 14px 18px;
+      overflow-x: auto;
+      margin: 12px 0;
+      color: var(--ink);
+    }
+    pre code {
+      background: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    ul, ol { margin: 0 0 14px 22px; }
+    li { color: var(--ink-soft); margin-bottom: 6px; }
+    li strong { color: var(--ink); }
+
+    /* Hero */
+    .hero { margin-bottom: 28px; }
+    .hero .kicker {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      color: var(--purple);
+      margin-bottom: 6px;
+      transform: rotate(-1deg);
+      display: inline-block;
+    }
+    .hero h1 { margin-bottom: 14px; }
+    .hero .lede {
+      font-size: 18px;
+      color: var(--ink-soft);
+      max-width: 760px;
+    }
+    .meta-row {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+      font-size: 13px;
+      color: var(--ink-muted);
+    }
+    .meta-row span { font-family: 'JetBrains Mono', monospace; }
+
+    /* Sketchy figure */
+    .figure {
+      margin: 28px 0;
+      text-align: center;
+    }
+    .figure img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 14px;
+      box-shadow:
+        0 1px 0 rgba(0,0,0,0.04),
+        0 12px 32px -8px rgba(42,38,32,0.18);
+      border: 1px solid var(--line);
+    }
+    .figure .caption {
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      color: var(--ink-muted);
+      margin-top: 10px;
+    }
+
+    /* Status panel — executive summary */
+    .status-panel {
+      background: linear-gradient(180deg, var(--paper-deep), var(--paper));
+      border: 2px solid var(--ink);
+      border-radius: 22px;
+      padding: 28px 32px;
+      margin: 32px 0;
+      position: relative;
+    }
+    .status-panel::before {
+      content: "";
+      position: absolute;
+      top: 6px; left: 6px; right: 6px; bottom: 6px;
+      border-radius: 16px;
+      border: 1px dashed var(--ink-muted);
+      pointer-events: none;
+      opacity: 0.4;
+    }
+    .status-panel .tag {
+      display: inline-block;
+      background: var(--yellow-soft);
+      border: 1.5px solid var(--yellow);
+      color: var(--ink);
+      font-family: 'Caveat', cursive;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 2px 14px;
+      border-radius: 18px;
+      transform: rotate(-1deg);
+      margin-bottom: 14px;
+    }
+    .status-panel h2 { margin: 0 0 12px; font-size: 26px; }
+    .status-panel h2::before { display: none; }
+    .status-panel .progress {
+      margin: 18px 0 8px;
+    }
+    .progress-track {
+      height: 18px;
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 67%;
+      background: linear-gradient(90deg, var(--green) 0%, var(--green) 80%, var(--yellow) 100%);
+      border-right: 2px solid var(--ink);
+    }
+    .progress-labels {
+      display: flex; justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--ink-muted);
+    }
+
+    /* Cards / panels */
+    .card {
+      background: var(--paper);
+      border: 1.5px solid var(--ink);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin: 14px 0;
+    }
+    .card.green { background: linear-gradient(170deg, var(--green-soft), var(--paper)); border-color: var(--green); }
+    .card.red   { background: linear-gradient(170deg, var(--red-soft), var(--paper)); border-color: var(--red); }
+    .card.blue  { background: linear-gradient(170deg, var(--blue-soft), var(--paper)); border-color: var(--blue); }
+    .card.yellow { background: linear-gradient(170deg, var(--yellow-soft), var(--paper)); border-color: var(--yellow); }
+    .card.purple { background: linear-gradient(170deg, var(--purple-soft), var(--paper)); border-color: var(--purple); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin: 20px 0;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+    @media (max-width: 800px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* Done list */
+    .done-list { list-style: none; margin: 12px 0; padding: 0; }
+    .done-list li {
+      padding: 10px 14px 10px 42px;
+      background: var(--paper);
+      border: 1.5px solid var(--green);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      position: relative;
+      color: var(--ink);
+    }
+    .done-list li::before {
+      content: "✓";
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 20px; height: 20px;
+      background: var(--green);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+    }
+    .done-list strong { color: var(--ink); }
+
+    /* Pending list */
+    .pending-list { list-style: none; margin: 12px 0; padding: 0; }
+    .pending-list li {
+      padding: 10px 14px 10px 42px;
+      background: var(--paper);
+      border: 1.5px solid var(--yellow);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .pending-list li::before {
+      content: "→";
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 20px; height: 20px;
+      background: var(--yellow);
+      color: var(--ink);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+    }
+
+    /* Consistency table */
+    .check-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 18px 0;
+      background: var(--paper);
+      border: 2px solid var(--ink);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .check-table th, .check-table td {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 13px;
+      border-bottom: 1px solid var(--line);
+    }
+    .check-table th {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      background: var(--paper-deep);
+      color: var(--ink);
+      border-bottom: 2px solid var(--ink);
+    }
+    .check-table td { color: var(--ink-soft); }
+    .check-table td:first-child { font-weight: 600; color: var(--ink); }
+    .check-table tr:last-child td { border-bottom: none; }
+    .check-table code { font-size: 11.5px; }
+    .match { color: var(--green); font-weight: 700; }
+
+    /* Steps timeline */
+    .steps {
+      counter-reset: step;
+      list-style: none;
+      margin: 18px 0;
+      padding: 0;
+    }
+    .steps li {
+      counter-increment: step;
+      padding: 16px 20px 16px 64px;
+      background: var(--paper);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .steps li::before {
+      content: counter(step);
+      position: absolute;
+      left: 18px; top: 14px;
+      width: 32px; height: 32px;
+      background: var(--purple);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700; font-size: 15px;
+    }
+    .steps li strong { display: block; color: var(--ink); margin-bottom: 4px; font-family: 'Outfit'; font-size: 16px; }
+    .steps li small { font-size: 12px; color: var(--ink-muted); font-family: 'JetBrains Mono', monospace; }
+
+    /* Gotcha card */
+    .gotcha {
+      background: var(--red-soft);
+      border-left: 4px solid var(--red);
+      padding: 14px 18px;
+      border-radius: 0 12px 12px 0;
+      margin: 12px 0;
+    }
+    .gotcha strong { color: var(--red); }
+
+    /* Error code badges */
+    .err {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      background: var(--red-soft);
+      border: 1px solid var(--red);
+      color: var(--ink);
+      padding: 2px 7px;
+      border-radius: 5px;
+      display: inline-block;
+      margin: 2px 4px 2px 0;
+    }
+
+    .tester-pill {
+      display: inline-block;
+      background: var(--green-soft);
+      border: 1.5px solid var(--green);
+      color: var(--ink);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      margin: 4px 6px 4px 0;
+    }
+
+    .footer {
+      margin-top: 70px;
+      padding-top: 24px;
+      border-top: 2px dashed var(--line);
+      text-align: center;
+      color: var(--ink-muted);
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .footer p { color: var(--ink-muted); }
+
+    .scribble {
+      font-family: 'Caveat', cursive;
+      color: var(--ink-soft);
+      font-size: 18px;
+      transform: rotate(-2deg);
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="kicker">— informe para el equipo —</div>
+      <h1>Estado de la <span style="color: var(--purple)">integración TikTok</span></h1>
+      <p class="lede">
+        Resumen visual de dónde estamos con la conexión de cuentas de operadores
+        a TikTok (Login Kit + Display API). La <strong>sandbox quedó configurada
+        y guardada</strong>; estamos listos para probar el flujo de punta a punta
+        con cuentas de prueba antes de pedir review para producción.
+      </p>
+      <div class="meta-row">
+        <span>Fecha: 2026-05-27</span>
+        <span>·</span>
+        <span>Proyecto: Studio Sharpods</span>
+        <span>·</span>
+        <span>Dominio: sharpods.ai</span>
+      </div>
+    </header>
+
+    <!-- HERO IMAGE -->
+    <div class="figure">
+      <img src="assets/donde-estamos.png" alt="Pipeline visual: App creada, Sandbox, Permisos, 3 testers, Probar conexión (paso actual), Producción">
+      <div class="caption">↑ ¿Dónde estamos? estamos en <strong>"Probar conexión"</strong> — paso 5 de 6.</div>
+    </div>
+
+    <!-- EXECUTIVE STATUS -->
+    <div class="status-panel">
+      <div class="tag">Resumen ejecutivo</div>
+      <h2>Lista para pruebas en sandbox 🟢</h2>
+      <p>
+        La integración de TikTok (conectar cuentas de operadores + leer métricas de
+        video vía Display API) está <strong>completamente cableada en sandbox</strong>.
+        Lo que falta es ejecutar la primera prueba con un tester real, validar el
+        flujo, y luego empezar el camino a producción. No hay configuración pendiente
+        del lado de TikTok ni de Supabase para empezar a probar.
+      </p>
+      <div class="progress">
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="progress-labels">
+          <span>App creada</span>
+          <span>Sandbox lista</span>
+          <span>← AQUÍ · Probar</span>
+          <span>Producción</span>
+        </div>
+      </div>
+      <p style="margin-top: 14px; font-size: 13px;">
+        <span class="handwrite" style="font-size: 18px;">≈ 67%</span> del camino completado — la parte
+        técnica pesada ya está hecha. Lo que queda es prueba operacional + revisión de TikTok.
+      </p>
+    </div>
+
+    <!-- DONE -->
+    <h2>Lo que ya está hecho ✓</h2>
+    <p>Estos puntos fueron verificados contra el repo en este informe — código y configuración están consistentes.</p>
+
+    <div class="grid-2">
+      <div>
+        <h3>🏢 App + organización en TikTok</h3>
+        <ul class="done-list">
+          <li><strong>App "Studio Sharpods"</strong> creada · App ID <code>7642759316860291088</code> · tipo "Other".</li>
+          <li><strong>Organización "icunox"</strong> · Org ID <code>7331505583796896773</code> · entidad US, ya activa.</li>
+          <li>Categoría, descripción, ToS / Privacy / Website · todos apuntando a <code>sharpods.ai</code>.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>🧪 Sandbox configurada y guardada</h3>
+        <ul class="done-list">
+          <li><strong>Sandbox</strong> · ID <code>7642759316860307472</code> · <strong>"Studio Sharpods Sandbox"</strong>.</li>
+          <li><strong>Login Kit</strong> habilitado.</li>
+          <li><strong>4 scopes</strong> configurados (ver tabla abajo).</li>
+          <li><strong>3 testers</strong> en la lista de Target Users.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card green">
+      <h3 style="margin-top: 0;">🔐 Backend en Supabase (también listo)</h3>
+      <ul style="margin-bottom: 0;">
+        <li><strong><code>verify_jwt = false</code></strong> en <code>tiktok-oauth-callback</code> · necesario porque TikTok redirige al callback como un navegador sin sesión.</li>
+        <li><strong><code>tiktok-oauth-init</code></strong> sigue con JWT activo · solo lo llama el frontend autenticado.</li>
+        <li><strong>5 secretos</strong> seteados en <em>Edge Functions → Secrets</em>: <code>TIKTOK_CLIENT_KEY</code>, <code>TIKTOK_CLIENT_SECRET</code>, <code>TIKTOK_REDIRECT_URI</code>, <code>OAUTH_STATE_SIGNING_KEY</code>, <code>TOKEN_ENCRYPTION_MASTER_KEY</code>.</li>
+        <li><strong>PKCE</strong> agregado al flow (LV-005) · tabla <code>tiktok_oauth_states</code> con state UUID + code_verifier de un solo uso (10 min de vida).</li>
+        <li><strong>3 edge functions</strong> deployeadas: <code>tiktok-oauth-init</code>, <code>tiktok-oauth-callback</code>, <code>tiktok-sync-account</code>.</li>
+      </ul>
+    </div>
+
+    <!-- OAUTH FLOW IMAGE -->
+    <h2>Cómo funciona el login (visual)</h2>
+    <p>Este es el camino completo que recorre el operador al apretar "Conectar TikTok". Cada flecha es una transición de página o una llamada HTTP.</p>
+    <div class="figure">
+      <img src="assets/como-funciona-login.png" alt="Flujo OAuth: persona → App Sharpods (botón Conectar TikTok) → TikTok → Supabase → Cuenta conectada">
+      <div class="caption">↑ Operador → "Conectar TikTok" → TikTok → callback en Supabase → cuenta guardada</div>
+    </div>
+
+    <ol class="steps">
+      <li>
+        <strong>Operador hace clic en "Conectar TikTok"</strong>
+        Componente <code>ConnectTikTokButton.tsx</code> llama <code>tiktok-oauth-init</code>.
+        <small>JWT requerido · operador autenticado en Supabase</small>
+      </li>
+      <li>
+        <strong>Frontend recibe authorize URL + state UUID</strong>
+        El edge function genera un par PKCE (code_verifier + code_challenge), inserta una fila en <code>tiktok_oauth_states</code> (vive 10 min), y arma la URL hacia TikTok con <code>code_challenge_method=S256</code>.
+        <small>Browser redirige a TikTok</small>
+      </li>
+      <li>
+        <strong>El operador aprueba los permisos en TikTok</strong>
+        Solo funciona si su cuenta está en la lista de 3 testers (ver abajo). Los scopes que se solicitan son <code>user.info.basic</code>, <code>user.info.profile</code>, <code>user.info.stats</code>, <code>video.list</code>.
+        <small>Sandbox = solo testers aprobados pueden completar el flujo</small>
+      </li>
+      <li>
+        <strong>TikTok redirige al callback con un <code>code</code></strong>
+        El callback (<code>tiktok-oauth-callback</code>) busca el state en la tabla, lo borra (single-use), y cambia el <code>code</code> por tokens reales usando el <code>code_verifier</code>.
+        <small>No requiere JWT · TikTok llega como browser anónimo</small>
+      </li>
+      <li>
+        <strong>Tokens se encriptan y la cuenta se guarda</strong>
+        Los tokens se cifran con AES-256-GCM + HKDF derivado por operador (master key en Supabase secrets). Se hace upsert en <code>social_accounts</code> con <code>UNIQUE(platform, platform_user_id)</code>.
+        <small>Sin tokens en claro en ningún lado</small>
+      </li>
+      <li>
+        <strong>Browser termina en <code>/operator/social-accounts?connected=true&account_id=…</code></strong>
+        La página lee el query param, muestra toast de éxito, y la cuenta aparece en la lista vía realtime.
+        <small>Listo · operador conectado · ya puede usar "Sync Now"</small>
+      </li>
+    </ol>
+
+    <!-- CONSISTENCY TABLE -->
+    <h2>Tabla de consistencia — tres piezas deben coincidir</h2>
+    <p>El error <strong>más común</strong> en OAuth es que el redirect URI registrado en TikTok no coincida exactamente con el secret <code>TIKTOK_REDIRECT_URI</code> ni con la URL real del edge function. Si una sola letra difiere → <code>redirect_uri_mismatch</code> y todo falla.</p>
+
+    <table class="check-table">
+      <thead>
+        <tr>
+          <th>Pieza</th>
+          <th>Dónde vive</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Redirect URI</td>
+          <td>TikTok Developer Console · Sandbox</td>
+          <td><code>https://mxalbyzxfnfmrygpbstp.supabase.co/functions/v1/tiktok-oauth-callback</code></td>
+        </tr>
+        <tr>
+          <td><code>TIKTOK_REDIRECT_URI</code> secret</td>
+          <td>Supabase · Edge Functions → Secrets</td>
+          <td><code>https://mxalbyzxfnfmrygpbstp.supabase.co/functions/v1/tiktok-oauth-callback</code></td>
+        </tr>
+        <tr>
+          <td>Edge Function URL real</td>
+          <td>Supabase · funciones desplegadas</td>
+          <td><code>https://mxalbyzxfnfmrygpbstp.supabase.co/functions/v1/tiktok-oauth-callback</code></td>
+        </tr>
+        <tr>
+          <td>Scopes registrados</td>
+          <td>TikTok Console · Sandbox · Login Kit</td>
+          <td>
+            <code>user.info.basic</code>, <code>user.info.profile</code>,
+            <code>user.info.stats</code>, <code>video.list</code>
+          </td>
+        </tr>
+        <tr>
+          <td>Scopes en código</td>
+          <td><code>tiktok-oauth-init/index.ts:10</code></td>
+          <td>
+            <code>user.info.basic</code>, <code>user.info.profile</code>,
+            <code>user.info.stats</code>, <code>video.list</code> <span class="match">← idénticos ✓</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- WHAT TO DO -->
+    <h2>Qué sigue 🔜</h2>
+
+    <div class="card yellow">
+      <h3 style="margin-top: 0;">1) Prueba end-to-end en sandbox (hacer hoy)</h3>
+      <p style="margin-bottom: 8px;">Ir a <code>/operator/social-accounts</code> → "Conectar TikTok" → login con uno de los testers → ver la cuenta conectada en la lista. <strong>Si esto funciona, la integración está validada.</strong></p>
+      <p style="margin-bottom: 10px;"><strong>Testers habilitados:</strong></p>
+      <div>
+        <span class="tester-pill">felipesharpods</span>
+        <span class="tester-pill">undineroextra</span>
+        <span class="tester-pill">felipeguorks</span>
+      </div>
+      <p style="font-size: 13px; margin-top: 14px; margin-bottom: 0;">Solo estas tres cuentas pueden completar el OAuth en sandbox. Si alguien intenta con otra cuenta, TikTok rechaza el login.</p>
+    </div>
+
+    <h3 style="margin-top: 28px;">Si algo falla — códigos de error del callback</h3>
+    <p>El callback siempre redirige a <code>/operator/social-accounts</code> con <code>?error=&lt;code&gt;</code> cuando algo se rompe. Cuando vean uno, crucen referencia con <code>supabase/functions/tiktok-oauth-callback/index.ts</code> y los logs de Supabase:</p>
+    <p>
+      <span class="err">token_exchange_failed</span>
+      <span class="err">state_mismatch</span>
+      <span class="err">user_info_fetch_failed</span>
+      <span class="err">duplicate_account</span>
+      <span class="err">tiktok_app_not_configured</span>
+      <span class="err">internal_error</span>
+    </p>
+
+    <!-- SANDBOX vs PROD IMAGE -->
+    <h2>Sandbox vs Producción</h2>
+    <p>Ya estamos parados en sandbox. El camino a producción es separado y empieza solo cuando la sandbox esté validada.</p>
+    <div class="figure">
+      <img src="assets/sandbox-vs-produccion.png" alt="Comparación visual: Sandbox listo ya, 3 testers, probar hoy · Producción requiere icono real, verificar dominio, review TikTok">
+    </div>
+
+    <div class="grid-2">
+      <div class="card green">
+        <h3 style="margin-top: 0;">🟢 Sandbox · ahora</h3>
+        <ul style="margin-bottom: 0;">
+          <li>Login funciona ya con los 3 testers.</li>
+          <li>Token exchange, sync, storage — todo activo.</li>
+          <li>Datos reales de TikTok (los videos de los testers).</li>
+          <li>Sin esperas, sin review.</li>
+        </ul>
+      </div>
+      <div class="card red">
+        <h3 style="margin-top: 0;">🔴 Producción · después</h3>
+        <ul style="margin-bottom: 0;">
+          <li><strong>Subir icono de marca real</strong> (no el placeholder).</li>
+          <li><strong>Verificar el dominio <code>sharpods.ai</code></strong> en TikTok URL Properties.</li>
+          <li>Re-agregar productos + scopes en la pestaña <em>Production</em>.</li>
+          <li><strong>Submit for review</strong> · ~5-15 días hábiles de espera.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- GOTCHAS -->
+    <h2>Gotchas para tener en mente</h2>
+
+    <div class="gotcha">
+      <strong>TikTok rechaza <code>localhost</code>.</strong> Por eso el redirect URI es la URL del edge function de Supabase, no una página del frontend. TikTok exige HTTPS y dominio público para todas las URLs de OAuth.
+    </div>
+
+    <div class="gotcha">
+      <strong>Sandbox y producción usan credenciales distintas.</strong> El <code>TIKTOK_CLIENT_KEY</code> que tenemos en Supabase ahora mismo es el de sandbox (<code>sbawav4p7sbhufhxd1</code>). Cuando aprueben producción, hay que <em>swapear</em> al client key + secret de producción. No mezclar.
+    </div>
+
+    <div class="gotcha">
+      <strong>El form de producción no tiene "guardar como borrador".</strong> No se puede ir llenando de a poco — TikTok rechaza el submit si falta algo. Llenar todo de una sola sentada cuando estemos listos.
+    </div>
+
+    <div class="gotcha">
+      <strong>El webhook <code>authorization.removed</code> está pendiente.</strong> Cuando un operador revoca el acceso desde TikTok, deberíamos marcarle la cuenta como <code>revoked</code>. Aún no está cableado (SDD §6.7.5C). Lo trabajamos después de validar el flujo principal.
+    </div>
+
+    <!-- QUICK REFERENCE -->
+    <h2>Referencia rápida</h2>
+    <table class="check-table">
+      <tbody>
+        <tr><td>TikTok App ID</td><td><code>7642759316860291088</code></td></tr>
+        <tr><td>Organización (icunox) ID</td><td><code>7331505583796896773</code></td></tr>
+        <tr><td>Sandbox ID</td><td><code>7642759316860307472</code></td></tr>
+        <tr><td>Sandbox Client Key (público)</td><td><code>sbawav4p7sbhufhxd1</code></td></tr>
+        <tr><td>Supabase Project Ref</td><td><code>mxalbyzxfnfmrygpbstp</code></td></tr>
+        <tr><td>Dominio</td><td><code>sharpods.ai</code></td></tr>
+        <tr><td>Sandbox Testers</td><td><code>felipesharpods</code>, <code>undineroextra</code>, <code>felipeguorks</code></td></tr>
+        <tr><td>Scopes</td><td><code>user.info.basic</code>, <code>user.info.profile</code>, <code>user.info.stats</code>, <code>video.list</code></td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top: 28px;">
+      <span class="scribble">~ archivos clave en el repo: ~</span>
+    </p>
+    <pre><code>supabase/functions/tiktok-oauth-init/index.ts        ← arma authorize URL + PKCE
+supabase/functions/tiktok-oauth-callback/index.ts    ← exchange code → tokens → upsert cuenta
+supabase/functions/tiktok-sync-account/index.ts      ← pulls últimos N videos
+supabase/functions/_shared/tiktok-client.ts          ← wrapper tipado del TikTok API
+src/pages/operator/SocialAccountsPage.tsx            ← lista de cuentas conectadas
+src/pages/operator/TikTokCallback.tsx                ← landing post-OAuth
+src/components/operator/ConnectTikTokButton.tsx      ← el botón "Conectar TikTok"
+src/services/social-accounts-service.ts              ← service layer (USE_MOCK = true por ahora)</code></pre>
+
+    <div class="footer">
+      <p>Studio Sharpods · Informe TikTok · Generado 2026-05-27</p>
+      <p>Ilustraciones generadas con Higgsfield (nano_banana_pro) · Diagramas hand-drawn</p>
+      <p style="margin-top: 8px;"><span class="scribble">— ¡a probar! 🚀 —</span></p>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # Design: `visual-report-builder` Skill
 
 **Date:** 2026-05-27
-**Author:** Claude Code (with Sir / felipe@guorks.ai)
+**Author:** Guorks Labs
 **Status:** Draft — pending review
 **Repo:** `~/dev/guorks_labs/visual-report-builder/` (to be created)
 

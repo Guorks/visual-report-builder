@@ -66,8 +66,8 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
 3. Plan however many images the report actually needs (no fixed cap — judge by content).
 4. Preflight: check the image cache (`src/observability/cache.ts`), then Higgsfield balance + `get_cost: true` on the first un-cached prompt.
 5. Generate all un-cached images in parallel.
-6. Download to `<output_dir>/assets/`, store in cache via `store(...)`.
-7. Author `report.json` conforming to `src/schema.ts`, then `tsx bin/render.ts report.json`.
+6. Download to `<output_dir>/assets/`, store in cache via `store(prompt, model, path, credits, rawUrl)` — keep the `rawUrl`.
+7. Author `report.json` conforming to `src/schema.ts` with both `src` (local path) and `src_cdn` (rawUrl) on each figure, then `tsx bin/render.ts report.json`. Default mode embeds local images for offline portability; `--image-mode cdn` swaps in the CDN URLs for a single-file shareable HTML.
 8. `open <output_path>` so the user sees it.
 9. Flush `.cost.json` + `.trace.jsonl`; if inside a git repo with a session log, append an entry.
 

@@ -67,6 +67,7 @@ const FigureNode = z
   .object({
     kind: z.literal("figure"),
     src: z.string().min(1),
+    src_cdn: z.string().url().optional(),
     alt: z.string().min(1),
     caption: z.string().min(1),
   })

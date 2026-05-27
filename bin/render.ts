@@ -2,25 +2,34 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve, basename } from "node:path";
 import { ZodError } from "zod";
-import { renderReport } from "../src/render/index.ts";
+import { renderReport, type ImageMode } from "../src/render/index.ts";
 
 function fail(msg: string, code = 1): never {
   process.stderr.write(`${msg}\n`);
   process.exit(code);
 }
 
-function parseArgs(argv: string[]): { input: string; out?: string } {
+function parseArgs(argv: string[]): { input: string; out?: string; imageMode: ImageMode } {
   const args = argv.slice(2);
   if (args.length === 0) {
-    fail("usage: tsx bin/render.ts <report.json> [--out <path>]", 2);
+    fail("usage: tsx bin/render.ts <report.json> [--out <path>] [--image-mode local|cdn]", 2);
   }
   let input: string | undefined;
   let out: string | undefined;
+  let imageMode: ImageMode = "local";
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
     if (a === "--out") {
       out = args[++i];
       if (!out) fail("--out requires a path", 2);
+    } else if (a === "--image-mode") {
+      const v = args[++i];
+      if (v !== "local" && v !== "cdn") fail("--image-mode must be 'local' or 'cdn'", 2);
+      imageMode = v;
+    } else if (a.startsWith("--image-mode=")) {
+      const v = a.slice("--image-mode=".length);
+      if (v !== "local" && v !== "cdn") fail("--image-mode must be 'local' or 'cdn'", 2);
+      imageMode = v;
     } else if (!input) {
       input = a;
     } else {
@@ -28,10 +37,10 @@ function parseArgs(argv: string[]): { input: string; out?: string } {
     }
   }
   if (!input) fail("missing input path", 2);
-  return { input, out };
+  return { input, out, imageMode };
 }
 
-const { input, out } = parseArgs(process.argv);
+const { input, out, imageMode } = parseArgs(process.argv);
 const inputPath = resolve(input);
 let raw: unknown;
 try {
@@ -42,7 +51,7 @@ try {
 
 let html: string;
 try {
-  html = renderReport(raw);
+  html = renderReport(raw, { imageMode });
 } catch (e) {
   if (e instanceof ZodError) {
     const issues = e.issues

@@ -81,9 +81,13 @@ When you reach the image-generation step:
 3. Submit all 2-3 images in parallel (`generate_image` without `get_cost`).
 4. Poll each job with `job_status` and `sync: true` (each ~10-20s).
 5. Download every result to `<output_dir>/assets/<descriptive-slug>.png`
-   via `curl`.
-6. Embed via relative `<img src="assets/...">` so the artifact is offline-
-   portable.
+   via `curl`. **Keep the Higgsfield `rawUrl`** too — write it to the
+   figure's `src_cdn` field (see pipeline step 7) so the same report can
+   render either offline (local PNGs, default) or as a single shareable
+   HTML file (`--image-mode cdn`).
+6. Embed via relative `<img src="assets/...">` for the offline-portable
+   default. The CDN URL kicks in only when the renderer is invoked with
+   `--image-mode cdn`.
 
 ## Worked example: the "¿Dónde estamos?" hero (TikTok report)
 

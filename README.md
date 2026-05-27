@@ -118,6 +118,26 @@ npx tsx bin/render.ts examples/tiktok-status-spanish/report.json
 npx tsx bin/eval.ts         # structural + tone over the goldset
 ```
 
+## Sharing online (CDN mode)
+
+By default the renderer emits `<img src="assets/...">` for offline
+portability — you ship the HTML + `assets/` folder together. When you
+want a **single self-contained HTML file** to email, attach, or upload
+without the assets folder, render with `--image-mode cdn`:
+
+```bash
+npx tsx bin/render.ts report.json --out report.shared.html --image-mode cdn
+```
+
+For this to work, each `figure` in the IR needs a `src_cdn` URL (the
+`rawUrl` returned by Higgsfield). The skill pipeline writes it
+automatically; if you're hand-authoring, copy it from the Higgsfield
+job result. Figures without `src_cdn` silently fall back to `src` in
+CDN mode.
+
+Trade-off: CDN URLs aren't guaranteed forever. For long-term hosting,
+upload your PNGs to your own bucket and put those URLs in `src_cdn`.
+
 ## Examples
 
 - [`tiktok-status-spanish/`](examples/tiktok-status-spanish/) — full

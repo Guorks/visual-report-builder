@@ -30,6 +30,7 @@ export type CachedEntry = {
   model: string;
   credits: number;
   created_at: string;
+  src_cdn?: string;
 };
 
 export function lookup(prompt: string, model: string): CachedEntry | null {
@@ -41,7 +42,13 @@ export function lookup(prompt: string, model: string): CachedEntry | null {
   return JSON.parse(readFileSync(meta, "utf8")) as CachedEntry;
 }
 
-export function store(prompt: string, model: string, sourcePng: string, credits: number): CachedEntry {
+export function store(
+  prompt: string,
+  model: string,
+  sourcePng: string,
+  credits: number,
+  srcCdn?: string,
+): CachedEntry {
   ensureDir(CACHE_ROOT);
   const hash = promptHash(prompt, model);
   const entry: CachedEntry = {
@@ -50,6 +57,7 @@ export function store(prompt: string, model: string, sourcePng: string, credits:
     model,
     credits,
     created_at: new Date().toISOString(),
+    ...(srcCdn ? { src_cdn: srcCdn } : {}),
   };
   copyFileSync(sourcePng, join(CACHE_ROOT, `${hash}.png`));
   writeFileSync(join(CACHE_ROOT, `${hash}.json`), JSON.stringify(entry, null, 2), "utf8");

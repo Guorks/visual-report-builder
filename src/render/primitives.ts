@@ -1,4 +1,5 @@
 import type { SectionNode } from "../schema.ts";
+import type { RenderOptions } from "./index.ts";
 
 const HTML_ESCAPES: Record<string, string> = {
   "&": "&amp;",
@@ -20,7 +21,7 @@ function tn(s: string): string {
   return `<span translate="no">${escape(s)}</span>`;
 }
 
-export function renderSection(node: SectionNode): string {
+export function renderSection(node: SectionNode, opts: RenderOptions = {}): string {
   switch (node.kind) {
     case "h2":
       return `<h2 translate="no">${escape(node.text)}</h2>`;
@@ -32,13 +33,15 @@ export function renderSection(node: SectionNode): string {
       const cls = node.language ? ` class="language-${attr(node.language)}"` : "";
       return `<pre translate="no"><code${cls}>${escape(node.body)}</code></pre>`;
     }
-    case "figure":
+    case "figure": {
+      const src = opts.imageMode === "cdn" && node.src_cdn ? node.src_cdn : node.src;
       return [
         `<div class="figure">`,
-        `<img src="${attr(node.src)}" alt="${attr(node.alt)}">`,
+        `<img src="${attr(src)}" alt="${attr(node.alt)}">`,
         `<div class="caption" translate="no">${escape(node.caption)}</div>`,
         `</div>`,
       ].join("");
+    }
     case "status-panel": {
       const parts: string[] = [];
       parts.push(`<div class="status-panel">`);
@@ -147,7 +150,7 @@ export function renderSection(node: SectionNode): string {
     case "grid-3": {
       const cls = node.kind === "grid-2" ? "grid-2" : "grid-3";
       const cells = (node.cells as SectionNode[][])
-        .map((cell) => `<div>${cell.map(renderSection).join("")}</div>`)
+        .map((cell) => `<div>${cell.map((n) => renderSection(n, opts)).join("")}</div>`)
         .join("");
       return `<div class="${cls}">${cells}</div>`;
     }

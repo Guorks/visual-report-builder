@@ -84,3 +84,27 @@ test("tester-pills items are double-escaped (escape + translate)", () => {
   assert.ok(!html.includes("<script>alert(1)</script>"));
   assert.ok(html.includes("&lt;script&gt;"));
 });
+
+test("figure src_cdn is used when imageMode=cdn and present", () => {
+  const figure = {
+    kind: "figure" as const,
+    src: "assets/local.png",
+    src_cdn: "https://cdn.example.com/x.png",
+    alt: "a",
+    caption: "c",
+  };
+  const local = renderReport(build([figure]));
+  const cdn = renderReport(build([figure]), { imageMode: "cdn" });
+  assert.ok(local.includes(`src="assets/local.png"`), "local mode uses src");
+  assert.ok(!local.includes("cdn.example.com"), "local mode must not emit cdn url");
+  assert.ok(cdn.includes(`src="https://cdn.example.com/x.png"`), "cdn mode uses src_cdn");
+  assert.ok(!cdn.includes(`src="assets/local.png"`), "cdn mode must not emit local src");
+});
+
+test("figure falls back to src when imageMode=cdn but src_cdn missing", () => {
+  const html = renderReport(
+    build([{ kind: "figure", src: "assets/x.png", alt: "a", caption: "c" }]),
+    { imageMode: "cdn" },
+  );
+  assert.ok(html.includes(`src="assets/x.png"`), "cdn mode falls back to src when src_cdn absent");
+});

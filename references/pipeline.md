@@ -58,7 +58,9 @@ const hit = lookup(fullPrompt, "nano_banana_pro");
 ```
 
 On hit: skip Higgsfield, copy the PNG via `copyToOutput(hit.hash, dest)`,
-emit a `image_cache_hit` event to `.trace.jsonl`.
+emit a `image_cache_hit` event to `.trace.jsonl`. If `hit.src_cdn` is
+set, reuse it as the figure's `src_cdn` in step 7 — no need to
+re-generate to recover the URL.
 
 On miss: continue.
 
@@ -81,10 +83,14 @@ Then poll each `job_status` with `sync: true`.
 
 `mkdir -p <output_dir>/assets`. For each completed job, `curl` the
 `rawUrl` to `<output_dir>/assets/<descriptive-slug>.png`. Use kebab-case
-slugs that match what the report references.
+slugs that match what the report references. **Keep the `rawUrl`** —
+you'll write it into the figure's `src_cdn` field in step 7 so the same
+report can render either offline-portable (local PNGs) or
+single-file-shareable (CDN URLs).
 
-Then call `store(prompt, "nano_banana_pro", assetPath, 2)` so the next
-invocation with the same prompt is a cache hit.
+Then call `store(prompt, "nano_banana_pro", assetPath, 2, rawUrl)` so
+the next invocation with the same prompt gets back both the local PNG
+and the CDN URL on a cache hit.
 
 ## Step 7 — Author `report.json` and render
 
@@ -92,13 +98,36 @@ Write the report as a typed IR file at `<output_dir>/report.json` that
 conforms to `src/schema.ts`. The IR is the artifact you are producing —
 HTML is a pure function of it.
 
-```bash
-npx tsx bin/render.ts <output_dir>/report.json --out <output_dir>/<slug>.html
+For every `figure` node, set both fields when you have them:
+
+```json
+{
+  "kind": "figure",
+  "src": "assets/<slug>.png",
+  "src_cdn": "https://d8j0ntlcm91z4.cloudfront.net/.../<slug>.png",
+  "alt": "...",
+  "caption": "..."
+}
 ```
 
-The renderer is deterministic: same JSON in, byte-identical HTML out.
-It validates the IR against the zod schema. Schema violations exit
-non-zero with the offending path.
+`src` is the local relative path (offline-portable default). `src_cdn`
+is optional — include it whenever the rawUrl is available so the report
+can also render in CDN mode without re-authoring.
+
+Render with one of two modes:
+
+```bash
+# default: local — offline-portable, ships with the assets/ folder
+npx tsx bin/render.ts <output_dir>/report.json --out <output_dir>/<slug>.html
+
+# CDN: single-file HTML, images load from Higgsfield (or wherever src_cdn points)
+npx tsx bin/render.ts <output_dir>/report.json --out <output_dir>/<slug>.shared.html --image-mode cdn
+```
+
+The renderer is deterministic *per mode*: same JSON + same mode = byte-
+identical HTML out. It validates the IR against the zod schema. Schema
+violations exit non-zero with the offending path. In `cdn` mode, figures
+without `src_cdn` silently fall back to `src` (no error).
 
 Hard rules from the design system:
 - No `any` JS — there is no JS at all. Pure HTML + inline CSS.

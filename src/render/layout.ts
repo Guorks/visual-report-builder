@@ -1,4 +1,5 @@
 import type { Report } from "../schema.ts";
+import type { RenderOptions } from "./index.ts";
 import { CSS } from "./css.ts";
 import { escape, renderSection } from "./primitives.ts";
 
@@ -56,8 +57,8 @@ export function renderFooter(report: Report): string {
   return `<div class="footer">${lines}</div>`;
 }
 
-export function renderDocument(report: Report): string {
-  const sections = report.sections.map(renderSection).join("\n");
+export function renderDocument(report: Report, opts: RenderOptions = {}): string {
+  const sections = report.sections.map((s) => renderSection(s, opts)).join("\n");
   return [
     renderHead(report),
     `<body>`,

@@ -9,7 +9,8 @@
     "word_count_range": [600, 1800],
     "required_node_kinds": ["status-panel", "steps", "badge-row"],
     "tone_must_include_any_of": ["edge function", "secret", "rotation", "outage", "utc"],
-    "tone_must_avoid": ["delightful", "seamless"]
+    "tone_must_avoid": ["delightful", "seamless"],
+    "max_custom_blocks": 0
   },
   "snapshot_report_json": "../snapshots/postmortem-engineers-en.json"
 }

@@ -1,6 +1,6 @@
 {
   "name": "visual-report-builder",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Hand-drawn HTML report builder — typed IR, deterministic renderer, eval harness.",

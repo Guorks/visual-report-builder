@@ -15,7 +15,8 @@
     "word_count_range": [800, 2200],
     "required_node_kinds": ["status-panel", "check-table", "steps", "gotcha"],
     "tone_must_include_any_of": ["edge function", "supabase", "commit", "redirect_uri", "scope"],
-    "tone_must_avoid": ["delightful", "powerful", "seamless"]
+    "tone_must_avoid": ["delightful", "powerful", "seamless"],
+    "max_custom_blocks": 0
   },
   "snapshot_report_json": "../../examples/tiktok-status-spanish/report.json"
 }

@@ -9,7 +9,8 @@
     "word_count_range": [400, 1200],
     "required_node_kinds": ["status-panel", "check-table"],
     "tone_must_include_any_of": ["pkce", "state", "csrf", "verifier", "challenge"],
-    "tone_must_avoid": ["delightful", "powerful"]
+    "tone_must_avoid": ["delightful", "powerful"],
+    "max_custom_blocks": 0
   },
   "snapshot_report_json": "../snapshots/decision-memo-engineers-en.json"
 }

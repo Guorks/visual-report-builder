@@ -9,7 +9,8 @@
     "word_count_range": [600, 1600],
     "required_node_kinds": ["status-panel", "steps"],
     "tone_must_include_any_of": ["objetivo", "equipo", "alcance", "plan"],
-    "tone_must_avoid": ["asombroso", "increíble"]
+    "tone_must_avoid": ["asombroso", "increíble"],
+    "max_custom_blocks": 0
   },
   "snapshot_report_json": "../snapshots/kickoff-mixed-es.json"
 }

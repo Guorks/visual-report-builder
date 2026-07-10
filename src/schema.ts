@@ -42,7 +42,7 @@ const Hero = z
     h1_pre: z.string(),
     h1_accent: z.string().min(1),
     h1_post: z.string(),
-    lede: z.string().min(1),
+    lede: z.string().min(1).describe("raw-html"),
   })
   .strict();
 

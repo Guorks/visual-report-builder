@@ -69,12 +69,20 @@ test("steps title is escaped (not raw-html)", () => {
   assert.ok(html.includes("&lt;script&gt;"));
 });
 
-test("hero kicker and lede are escaped", () => {
+test("hero kicker is escaped", () => {
   const report = build([{ kind: "h2", text: "ok" }]);
-  (report as Report).hero = { ...baseHero, kicker: XSS, lede: XSS };
+  (report as Report).hero = { ...baseHero, kicker: XSS };
   const html = renderReport(report);
   const scriptCount = (html.match(/<script>/g) ?? []).length;
   assert.equal(scriptCount, 0, "no raw <script> in hero output");
+});
+
+test("hero lede passes through as raw-html (allows <strong>)", () => {
+  const report = build([{ kind: "h2", text: "ok" }]);
+  (report as Report).hero = { ...baseHero, lede: "entro como <strong>socia</strong>" };
+  const html = renderReport(report);
+  assert.ok(html.includes("<strong>socia</strong>"), "raw-html lede allowed");
+  assert.ok(!html.includes("&lt;strong&gt;"), "lede must not be escaped");
 });
 
 test("tester-pills items are double-escaped (escape + translate)", () => {

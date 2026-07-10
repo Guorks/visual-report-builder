@@ -44,7 +44,7 @@ export function renderHero(report: Report): string {
     `<header class="hero">`,
     `<div class="kicker" translate="no">${escape(hero.kicker)}</div>`,
     `<h1 translate="no">${h1}</h1>`,
-    `<p class="lede" translate="no">${escape(hero.lede)}</p>`,
+    `<p class="lede" translate="no">${hero.lede}</p>`,
     `<div class="meta-row">${metaParts.join("")}</div>`,
     `</header>`,
   ].join("");

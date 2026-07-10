@@ -5,7 +5,7 @@ import { escape, renderSection, renderFigure } from "./primitives.ts";
 
 const FONTS_LINK = `<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">`;
 
-export function renderHead(report: Report): string {
+export function renderHead(report: Report, customCss = ""): string {
   return [
     `<!doctype html>`,
     `<html lang="${escape(report.meta.language)}">`,
@@ -17,6 +17,7 @@ export function renderHead(report: Report): string {
     `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
     FONTS_LINK,
     `<style>${CSS}</style>`,
+    ...(customCss ? [`<style data-custom>${customCss}</style>`] : []),
     `</head>`,
   ].join("\n");
 }
@@ -65,10 +66,10 @@ export function renderFooter(report: Report): string {
   return `<div class="footer">${lines}</div>`;
 }
 
-export function renderDocument(report: Report, opts: RenderOptions = {}): string {
+export function renderDocument(report: Report, opts: RenderOptions = {}, customCss = ""): string {
   const sections = report.sections.map((s) => renderSection(s, opts)).join("\n");
   return [
-    renderHead(report),
+    renderHead(report, customCss),
     `<body>`,
     `<div class="wrap">`,
     renderHero(report, opts),

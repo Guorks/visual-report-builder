@@ -455,4 +455,6 @@ a.cta-button { border-bottom: 2px solid var(--ink); }
 .chart-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 10px; font-size: 13px; color: var(--ink-soft); }
 .chart-key { display: inline-flex; align-items: center; gap: 6px; }
 .chart-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-block; }
-.chart-key-value { font-family: 'JetBrains Mono', monospace; }`;
+.chart-key-value { font-family: 'JetBrains Mono', monospace; }
+
+.custom-block { margin: 20px 0; }`;

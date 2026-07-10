@@ -194,6 +194,8 @@ export function renderSection(node: SectionNode, opts: RenderOptions = {}): stri
       return renderChartBar(node);
     case "chart-donut":
       return renderChartDonut(node);
+    case "custom":
+      return `<div class="custom-block">${node.html}</div>`;
   }
 }
 

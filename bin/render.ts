@@ -1,8 +1,20 @@
 #!/usr/bin/env tsx
-import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve, basename } from "node:path";
+import { readFileSync, writeFileSync, appendFileSync } from "node:fs";
+import { dirname, resolve, basename, join } from "node:path";
 import { ZodError } from "zod";
-import { renderReport, InlineHtmlError, type ImageMode } from "../src/render/index.ts";
+import { renderReport, InlineHtmlError, Report, type ImageMode } from "../src/render/index.ts";
+import type { SectionNode } from "../src/schema.ts";
+
+function collectCustomNotes(sections: SectionNode[]): string[] {
+  const notes: string[] = [];
+  for (const s of sections) {
+    if (s.kind === "custom") notes.push(s.note);
+    else if (s.kind === "grid-2" || s.kind === "grid-3") {
+      for (const cell of s.cells as SectionNode[][]) notes.push(...collectCustomNotes(cell));
+    }
+  }
+  return notes;
+}
 
 function fail(msg: string, code = 1): never {
   process.stderr.write(`${msg}\n`);
@@ -77,4 +89,13 @@ const outPath = out
   ? resolve(out)
   : resolve(dirname(inputPath), basename(inputPath, ".json") + ".html");
 writeFileSync(outPath, html, "utf8");
+
+const customNotes = collectCustomNotes(Report.parse(raw).sections);
+if (customNotes.length) {
+  const tracePath = join(dirname(outPath), ".trace.jsonl");
+  for (const note of customNotes) {
+    appendFileSync(tracePath, JSON.stringify({ event: "custom_block_used", note, ts: null }) + "\n");
+  }
+}
+
 process.stdout.write(`${outPath}\n`);

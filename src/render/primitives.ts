@@ -2,6 +2,7 @@ import type { SectionNode } from "../schema.ts";
 import type { RenderOptions } from "./index.ts";
 
 import { escape, attr } from "./text.ts";
+import { renderChartBar, renderChartDonut } from "./charts.ts";
 export { escape };
 
 function tn(s: string): string {
@@ -189,6 +190,10 @@ export function renderSection(node: SectionNode, opts: RenderOptions = {}): stri
       return node.style === "scribble"
         ? `<div class="divider divider-scribble" aria-hidden="true">~~~~~~~</div>`
         : `<div class="divider divider-dashed" aria-hidden="true"></div>`;
+    case "chart-bar":
+      return renderChartBar(node);
+    case "chart-donut":
+      return renderChartDonut(node);
   }
 }
 

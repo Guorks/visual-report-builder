@@ -325,6 +325,34 @@ const DividerNode = z
   })
   .strict();
 
+const ChartDatum = z
+  .object({
+    label: z.string().min(1),
+    value: z.number().finite().nonnegative(),
+    color: CardColor.optional(),
+  })
+  .strict();
+
+const ChartBarNode = z
+  .object({
+    kind: z.literal("chart-bar"),
+    title: z.string().min(1).optional(),
+    data: z.array(ChartDatum).min(2).max(8),
+    unit: z.string().optional(),
+    caption: z.string().min(1).optional(),
+  })
+  .strict();
+
+const ChartDonutNode = z
+  .object({
+    kind: z.literal("chart-donut"),
+    title: z.string().min(1).optional(),
+    data: z.array(ChartDatum).min(2).max(6),
+    center_label: z.string().min(1).optional(),
+    caption: z.string().min(1).optional(),
+  })
+  .strict();
+
 type SectionNodeShape =
   | z.infer<typeof StatusPanelNode>
   | z.infer<typeof FigureNode>
@@ -352,6 +380,8 @@ type SectionNodeShape =
   | z.infer<typeof QuoteNode>
   | z.infer<typeof FigureRowNode>
   | z.infer<typeof DividerNode>
+  | z.infer<typeof ChartBarNode>
+  | z.infer<typeof ChartDonutNode>
   | { kind: "grid-2"; cells: [SectionNodeShape[], SectionNodeShape[]] }
   | { kind: "grid-3"; cells: [SectionNodeShape[], SectionNodeShape[], SectionNodeShape[]] };
 
@@ -383,6 +413,8 @@ const SectionNode: z.ZodType<SectionNodeShape> = z.lazy(() =>
     QuoteNode,
     FigureRowNode,
     DividerNode,
+    ChartBarNode,
+    ChartDonutNode,
     Grid2Node,
     Grid3Node,
   ]),
@@ -449,4 +481,6 @@ export const NODE_KINDS = [
   "quote",
   "figure-row",
   "divider",
+  "chart-bar",
+  "chart-donut",
 ] as const;

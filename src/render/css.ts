@@ -444,4 +444,15 @@ a.cta-button { border-bottom: 2px solid var(--ink); }
 .figure--left { text-align: left; }
 .figure--right { text-align: right; }
 
-.hero-badges { margin: 4px 0 10px; }`;
+.hero-badges { margin: 4px 0 10px; }
+
+.chart { margin: 28px 0; text-align: center; }
+.chart svg { max-width: 100%; height: auto; }
+.chart h3 { text-align: left; }
+.chart svg text { font-family: 'JetBrains Mono', monospace; font-size: 13px; fill: var(--ink); }
+.chart svg .chart-label { font-family: 'Caveat', cursive; font-size: 19px; fill: var(--ink-soft); }
+.chart svg .chart-center { font-family: 'Caveat', cursive; font-size: 34px; font-weight: 700; fill: var(--ink); }
+.chart-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 10px; font-size: 13px; color: var(--ink-soft); }
+.chart-key { display: inline-flex; align-items: center; gap: 6px; }
+.chart-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-block; }
+.chart-key-value { font-family: 'JetBrains Mono', monospace; }`;

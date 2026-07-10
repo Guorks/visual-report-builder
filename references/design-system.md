@@ -126,6 +126,10 @@ Fields marked `raw-html` in `src/schema.ts` accept ONLY:
 - `style` props: `font-size color text-align margin* padding*` (no `url()`)
 - `a href` schemes: `https://` `http://` `mailto:` `#`
 
-The renderer hard-fails on `<script>`, `on*` attributes, `javascript:`
-URLs, and embeds. Anything else off-list renders with a warning.
-`--strict-html` turns warnings into errors (CI mode).
+The renderer hard-fails (refuses to render) on: the tags `script style
+iframe object embed link meta img svg`; any `on*` event-handler
+attribute; `href` schemes outside `https:// http:// mailto: #` (so
+`javascript:` is rejected); `url(` or `expression` in a `style` value;
+and any unquoted attribute value. Off-list tags, classes, and style
+properties that are not in these hard-fail categories render with a
+warning. `--strict-html` promotes warnings to errors (CI mode).

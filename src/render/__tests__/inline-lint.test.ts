@@ -37,6 +37,27 @@ test("renderReport throws InlineHtmlError on script in paragraph body", () => {
   assert.throws(() => renderReport(bad), InlineHtmlError);
 });
 
+test("unquoted attribute values are hard errors (bypass probes)", () => {
+  assert.ok(lintInlineHtml(`<a onclick=alert(1)>l</a>`, "p").errors.length >= 1);
+  assert.ok(lintInlineHtml(`<a href=javascript:alert(1)>l</a>`, "p").errors.length >= 1);
+  assert.ok(lintInlineHtml(`<a onmouseover=1>l</a>`, "p").errors.length >= 1);
+  assert.ok(lintInlineHtml(`<a onclick>l</a>`, "p").errors.length >= 1); // bare valueless on*
+});
+
+test("renderReport throws InlineHtmlError on unquoted onclick", () => {
+  const bad = {
+    meta: { title: "t", language: "en", type: "status", audience: "engineers", date: "d", project: "p", footer_lines: ["f"] },
+    hero: { kicker: "k", h1_pre: "", h1_accent: "A", h1_post: "", lede: "l" },
+    sections: [{ kind: "paragraph", body: `<a onclick=alert(1)>l</a>` }],
+  };
+  assert.throws(() => renderReport(bad), InlineHtmlError);
+});
+
+test("quoted values with spaces around = stay clean (negative control)", () => {
+  const r = lintInlineHtml(`<a href = "https://x.co">l</a>`, "p");
+  assert.deepEqual(r, { errors: [], warnings: [] });
+});
+
 test("the canonical example lints clean (no errors)", () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const ir = JSON.parse(readFileSync(join(here, "../../../examples/tiktok-status-spanish/report.json"), "utf8"));

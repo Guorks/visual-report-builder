@@ -13,10 +13,29 @@ const ALLOWED_CLASSES = new Set([
 ]);
 const ALLOWED_STYLE_PROPS = /^(font-size|color|text-align|margin(-\w+)?|padding(-\w+)?)$/;
 
-const TAG_RE = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
-const ATTR_RE = /([a-zA-Z-]+)\s*=\s*("([^"]*)"|'([^']*)')/g;
+export const TAG_RE = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
+export const ATTR_RE = /([a-zA-Z-]+)\s*=\s*("([^"]*)"|'([^']*)')/g;
+const UNQUOTED_ATTR_RE = /([a-zA-Z-]+)\s*=\s*[^\s"'>][^\s>]*/g;
+const BARE_ON_ATTR_RE = /(?:^|[\s/])(on[a-zA-Z]+)(?=[\s/]|$)/gi;
 
 export type LintResult = { errors: string[]; warnings: string[] };
+
+// ATTR_RE only matches quoted values, so anything it leaves behind is either an
+// unquoted value assignment or a bare attribute name — both hard errors (an
+// unquoted on*/href value would otherwise bypass the allowlist entirely).
+// Shared so other linters over the same TAG_RE/ATTR_RE grammar inherit the fix.
+export function findUnquotedAttrIssues(attrs: string, path: string): string[] {
+  const issues: string[] = [];
+  const leftover = attrs.replace(ATTR_RE, " ");
+  for (const m of leftover.matchAll(UNQUOTED_ATTR_RE)) {
+    issues.push(`${path}: unquoted attribute value for "${m[1]!.toLowerCase()}" — quote all attribute values`);
+  }
+  const bare = leftover.replace(UNQUOTED_ATTR_RE, " ");
+  for (const m of bare.matchAll(BARE_ON_ATTR_RE)) {
+    issues.push(`${path}: bare event handler attribute ${m[1]!.toLowerCase()}`);
+  }
+  return issues;
+}
 
 export function lintInlineHtml(html: string, path: string): LintResult {
   const errors: string[] = [];
@@ -50,6 +69,7 @@ export function lintInlineHtml(html: string, path: string): LintResult {
         warnings.push(`${path}: attribute "${name}" outside allowlist`);
       }
     }
+    errors.push(...findUnquotedAttrIssues(attrs, path));
   }
   return { errors, warnings };
 }

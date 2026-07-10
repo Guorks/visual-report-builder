@@ -1,7 +1,7 @@
 import type { Report } from "../schema.ts";
 import type { RenderOptions } from "./index.ts";
 import { CSS } from "./css.ts";
-import { escape, renderSection } from "./primitives.ts";
+import { escape, renderSection, renderFigure } from "./primitives.ts";
 
 const FONTS_LINK = `<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">`;
 
@@ -21,7 +21,7 @@ export function renderHead(report: Report): string {
   ].join("\n");
 }
 
-export function renderHero(report: Report): string {
+export function renderHero(report: Report, opts: RenderOptions = {}): string {
   const { hero, meta } = report;
   const metaParts = [
     `<span translate="no">${escape(meta.date)}</span>`,
@@ -40,12 +40,20 @@ export function renderHero(report: Report): string {
   ]
     .filter(Boolean)
     .join(" ");
+  const badges = hero.badges
+    ? `<div class="hero-badges">${hero.badges
+        .map((b) => `<span class="badge-${b.kind}" translate="no">${escape(b.text)}</span>`)
+        .join(" ")}</div>`
+    : "";
+  const heroFigure = hero.figure ? renderFigure(hero.figure, opts) : "";
   return [
     `<header class="hero">`,
     `<div class="kicker" translate="no">${escape(hero.kicker)}</div>`,
+    badges,
     `<h1 translate="no">${h1}</h1>`,
     `<p class="lede" translate="no">${hero.lede}</p>`,
     `<div class="meta-row">${metaParts.join("")}</div>`,
+    heroFigure,
     `</header>`,
   ].join("");
 }
@@ -63,7 +71,7 @@ export function renderDocument(report: Report, opts: RenderOptions = {}): string
     renderHead(report),
     `<body>`,
     `<div class="wrap">`,
-    renderHero(report),
+    renderHero(report, opts),
     sections,
     renderFooter(report),
     `</div>`,

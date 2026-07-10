@@ -51,10 +51,14 @@ export function lintCustomNode(
     if (/position\s*:\s*fixed/i.test(node.css)) errors.push(`${path}.css: position: fixed forbidden`);
     if (/animation|@keyframes/i.test(node.css)) errors.push(`${path}.css: animations forbidden`);
     if (/url\s*\(\s*['"]?(?!assets\/)/i.test(node.css)) errors.push(`${path}.css: url() must point at assets/`);
-    // every top-level selector must contain a .x-* class
+    // every compound in every top-level selector must contain a .x-* class
+    // (a comma group like ".x-a, body" must not smuggle global selectors)
     const selectors = node.css.replace(/\/\*[\s\S]*?\*\//g, "").split("}").map((b) => b.split("{")[0]?.trim() ?? "").filter(Boolean);
     for (const sel of selectors) {
-      if (!/\.x-[a-zA-Z0-9_-]+/.test(sel)) errors.push(`${path}.css: selector "${sel}" must target a .x-* class`);
+      const parts = sel.split(",").map((p) => p.trim()).filter(Boolean);
+      if (!parts.every((part) => /\.x-[a-zA-Z0-9_-]+/.test(part))) {
+        errors.push(`${path}.css: selector "${sel}" must target a .x-* class`);
+      }
     }
   }
 

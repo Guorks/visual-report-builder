@@ -43,3 +43,13 @@ test("report without custom nodes emits no data-custom style block", () => {
 test("custom html rejects unquoted event handler (bypass probe)", () => {
   assert.throws(() => renderReport(withCustom(`<div onclick=alert(1)>a</div>`)), InlineHtmlError);
 });
+
+test("comma-group selectors cannot smuggle global CSS (bypass probe)", () => {
+  assert.throws(() => renderReport(withCustom(`<div class="x-a">a</div>`, `.x-a, body { display: none; }`)), InlineHtmlError);
+  assert.throws(() => renderReport(withCustom(`<div class="x-a">a</div>`, `body, .x-a { color: red; }`)), InlineHtmlError);
+});
+
+test("multi-compound all-x selector still renders", () => {
+  const out = renderReport(withCustom(`<div class="x-a">a</div>`, `.x-a, .x-b { color: var(--ink); }`));
+  assert.ok(out.includes(`<style data-custom>.x-a, .x-b { color: var(--ink); }</style>`));
+});

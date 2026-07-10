@@ -111,7 +111,11 @@ allowed inside a raw-html field. Consequences:
    whispering "2-3 images."
 4. The single-file / offline story becomes true: an `embed` image mode
    produces one self-contained HTML file.
-5. All F1–F12 findings resolved or explicitly waived.
+5. Numeric information renders as **real charts** (deterministic inline
+   SVG in the hand-drawn aesthetic), not as hand-lettered numbers inside
+   generated images. Generated illustrations carry *concepts*; charts
+   carry *data*.
+6. All F1–F12 findings resolved or explicitly waived.
 
 **Non-goals (unchanged from v0.1 §11)**
 
@@ -379,7 +383,73 @@ const CustomNode = z.object({
 5. **Aspect-aware prompt guidance:** image-style-guide gains per-aspect
    composition advice + the `aspect_ratio` API parameter table.
 
-### 4.5 Tooling & CI
+### 4.5 Chart nodes — data-driven, hand-drawn SVG
+
+Today the only way to "show" a number visually is to bake it into a
+Higgsfield illustration — where text garbles past 3 words, values can't
+be trusted pixel-perfect, and regeneration costs credits. Charts should
+be **computed from data in the IR**, not drawn by a diffusion model.
+
+**Why not Chart.js / ECharts / any runtime library:** every JS chart
+library violates three locked rules at once — "No JavaScript" (runtime
+scripts), offline (CDN `<script>` tags), and print (canvas often drops
+out). Instead, the **renderer** generates charts as inline `<svg>` at
+render time, in Node, deterministically:
+
+- Dependency: `roughjs` (used via its headless `generator` API — no DOM),
+  with a fixed `seed` derived from the SHA-256 of the chart's data, so
+  the same IR always yields byte-identical wobbles. Hand-drawn bars,
+  arcs, and lines that match the notebook aesthetic natively.
+- Colors come only from the design tokens (`--green`, `--red`, …);
+  labels render in Caveat, values in JetBrains Mono. No new palette.
+- Pure SVG output: no runtime JS, no network, prints correctly, embeds
+  in single-file mode for free.
+
+```ts
+const ChartDatum = z.object({
+  label: z.string().min(1),
+  value: z.number(),
+  color: CardColor.optional(),      // defaults cycle through the palette
+}).strict();
+
+const ChartBarNode = z.object({
+  kind: z.literal("chart-bar"),
+  title: z.string().optional(),
+  data: z.array(ChartDatum).min(2).max(8),
+  unit: z.string().optional(),      // "%", "credits", "$"
+  caption: z.string().optional(),   // Caveat-font, like figure captions
+}).strict();
+
+const ChartDonutNode = z.object({
+  kind: z.literal("chart-donut"),
+  title: z.string().optional(),
+  data: z.array(ChartDatum).min(2).max(6),
+  center_label: z.string().optional(),  // big Caveat number in the hole
+  caption: z.string().optional(),
+}).strict();
+
+const ChartLineNode = z.object({
+  kind: z.literal("chart-line"),
+  title: z.string().optional(),
+  series: z.array(z.object({
+    name: z.string().min(1),
+    color: CardColor.optional(),
+    points: z.array(z.object({ x: z.string(), y: z.number() }).strict()).min(2),
+  }).strict()).min(1).max(3),
+  unit: z.string().optional(),
+  caption: z.string().optional(),
+}).strict();
+```
+
+Authoring guidance (SKILL.md + image-style-guide): **data → chart node;
+concept → generated illustration.** A progress %, a cost breakdown, a
+views-over-time curve are chart nodes (free, exact, regenerable); a
+pipeline metaphor, a mascot moment, an architecture doodle stay
+Higgsfield. `stat-row` (§4.1) covers single headline numbers; charts
+cover distributions and trends. Charts also compose with `grid-2`
+(chart + prose side by side) and count separately from images in evals.
+
+### 4.6 Tooling & CI
 
 - `bin/render.ts --validate`: parse + lint only, no output file. The
   authoring loop can check the IR before spending render/open time.
@@ -395,7 +465,7 @@ const CustomNode = z.object({
 - `cache.prune` prunes by pair: delete `.png`+`.json` together when the
   *newer* of the two is past cutoff (F10).
 
-### 4.6 Report type escape (F12) — small, optional
+### 4.7 Report type escape (F12) — small, optional
 
 Add `"custom"` to the `ReportType` enum plus
 `references/report-types/custom.md`: the agent designs its own section
@@ -403,7 +473,7 @@ recipe, states it in one sentence in `meta.extra`, and audience
 modifiers still apply. Structural eval skips recipe checks for custom
 type; the LLM judge still scores audience match and craft.
 
-### 4.7 Documentation truth pass
+### 4.8 Documentation truth pass
 
 - `SKILL.md` "Don't hand-write HTML" → "Don't hand-write *documents*.
   Inline markup inside raw-html fields follows the allowlist in
@@ -435,7 +505,11 @@ type; the LLM judge still scores audience match and craft.
    `cta-card` + `stat-row`; new `postmortem` entry requiring `timeline`
    + `action-list`; one entry exercising `figure-row` + frameless
    figures.
-5. **Judge rubric:** add a line to `image_prompt_quality` — penalize
+5. **Chart tests:** snapshot the SVG output of each chart node for a
+   fixed dataset (seeded roughness must be byte-stable across runs and
+   platforms); reject NaN/negative-where-invalid values at the schema
+   layer; verify chart SVGs contain no `<script>` and no external refs.
+6. **Judge rubric:** add a line to `image_prompt_quality` — penalize
    reports whose content begged for a diagram/screenshot that isn't
    there (the anti-"too few images" pressure, matching the user's ask).
 
@@ -458,8 +532,8 @@ type; the LLM judge still scores audience match and craft.
 
 | Phase | Contents |
 |---|---|
-| **P0 — unblocks the user's pain** | Tier-1 nodes + Figure flexibility + hero slots; inline-lint (tier 2); `custom` node (tier 3); doc truth pass (SKILL.md, image-style-guide caps, design-system allowlist); eval extensions; unit tests |
-| **P1 — honest artifacts** | `--image-mode embed`; cdn-mode warnings; `--validate`; CI workflow; print CSS; check-table refine; schema small-unlocks (F4/F6/F9) |
+| **P0 — unblocks the user's pain** | Tier-1 nodes + Figure flexibility + hero slots; `chart-bar` + `chart-donut` (§4.5); inline-lint (tier 2); `custom` node (tier 3); doc truth pass (SKILL.md, image-style-guide caps, design-system allowlist); eval extensions; unit tests |
+| **P1 — honest artifacts** | `chart-line`; `--image-mode embed`; cdn-mode warnings; `--validate`; CI workflow; print CSS; check-table refine; schema small-unlocks (F4/F6/F9) |
 | **P2 — nice-to-have** | `--embed-fonts` + vendored woff2; JSON Schema export; `custom` report type; cache prune pairing (F10) |
 
 ## 8. Risks
@@ -482,6 +556,11 @@ type; the LLM judge still scores audience match and craft.
    determinism beats cleverness.
 3. Does `cta-card.action.href` need `https`-only enforcement like tier-2
    links? Current lean: yes, same scheme allowlist.
+4. Chart style: hand-drawn rough strokes (roughjs, seeded — matches the
+   notebook aesthetic) vs. clean flat minimal SVG (crisper for investor
+   decks)? Current lean: rough by default; it's the skill's identity.
+   A per-chart `style: "clean"` override could come later if real
+   demand surfaces (YAGNI for now).
 
 ---
 

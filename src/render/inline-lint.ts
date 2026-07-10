@@ -37,9 +37,23 @@ export function findUnquotedAttrIssues(attrs: string, path: string): string[] {
   return issues;
 }
 
+// TAG_RE only matches a tag when a literal '>' terminates it within the field.
+// A raw-html field whose '<' has no following '>' is never iterated by TAG_RE,
+// so the linter would otherwise report zero errors while the browser forms the
+// element by consuming the renderer's own trailing template markup (e.g. the
+// </p> after a paragraph body). Strip well-formed tags, then reject any
+// residual '<' directly followed by a letter or '/' — that's an unterminated
+// tag opener. Legit prose '<' (a < b, 5 < 10, x <3) is never followed by a
+// letter or slash, so it's untouched.
+export function findUnterminatedTag(html: string, path: string): string[] {
+  const residual = html.replace(TAG_RE, "");
+  return /<\/?[a-zA-Z]/.test(residual) ? [`${path}: unterminated tag ('<' without a closing '>')`] : [];
+}
+
 export function lintInlineHtml(html: string, path: string): LintResult {
   const errors: string[] = [];
   const warnings: string[] = [];
+  errors.push(...findUnterminatedTag(html, path));
   for (const m of html.matchAll(TAG_RE)) {
     if (m[1] === "/") continue; // closing tags carry no attributes; checked once at the opening tag
     const tag = m[2]!.toLowerCase();

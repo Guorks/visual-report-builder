@@ -53,3 +53,25 @@ test("multi-compound all-x selector still renders", () => {
   const out = renderReport(withCustom(`<div class="x-a">a</div>`, `.x-a, .x-b { color: var(--ink); }`));
   assert.ok(out.includes(`<style data-custom>.x-a, .x-b { color: var(--ink); }</style>`));
 });
+
+test("unterminated custom html tag is rejected (bypass probe)", () => {
+  assert.throws(
+    () => renderReport(withCustom(`<img src="https://a" onerror="alert(1)"`)),
+    InlineHtmlError,
+  );
+});
+
+test("custom css cannot break out of <style> into a live <script> (bypass probe)", () => {
+  assert.throws(
+    () => renderReport(withCustom(
+      `<div class="x-a">a</div>`,
+      `</style><script>alert(1)</script>.x-a{color:red}`,
+    )),
+    InlineHtmlError,
+  );
+});
+
+test("valid css with no angle brackets still renders", () => {
+  const out = renderReport(withCustom(`<div class="x-a">a</div>`, `.x-a{color:var(--ink)}`));
+  assert.ok(out.includes(`<style data-custom>.x-a{color:var(--ink)}</style>`));
+});

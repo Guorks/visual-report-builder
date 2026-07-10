@@ -1,4 +1,4 @@
-import { TAG_RE, ATTR_RE, findUnquotedAttrIssues } from "./inline-lint.ts";
+import { TAG_RE, ATTR_RE, findUnquotedAttrIssues, findUnterminatedTag } from "./inline-lint.ts";
 
 const BLOCK_ALLOWED = new Set([
   "div", "p", "h3", "h4", "table", "thead", "tbody", "tr", "th", "td",
@@ -22,6 +22,7 @@ export function lintCustomNode(
   const errors: string[] = [];
   const warnings: string[] = [];
 
+  errors.push(...findUnterminatedTag(node.html, `${path}.html`));
   for (const m of node.html.matchAll(TAG_RE)) {
     if (m[1] === "/") continue; // closing tags carry no attributes; checked once at the opening tag
     const tag = m[2]!.toLowerCase();
@@ -47,6 +48,10 @@ export function lintCustomNode(
   }
 
   if (node.css) {
+    // CSS legitimately never needs '<' or '>'; this is the emission-context
+    // guard that stops a custom.css payload from closing the renderer's
+    // <style data-custom> tag early and injecting a live <script> into <head>.
+    if (/[<>]/.test(node.css)) errors.push(`${path}.css: '<' or '>' are not allowed in custom CSS`);
     if (/@import/i.test(node.css)) errors.push(`${path}.css: @import forbidden`);
     if (/position\s*:\s*fixed/i.test(node.css)) errors.push(`${path}.css: position: fixed forbidden`);
     if (/animation|@keyframes/i.test(node.css)) errors.push(`${path}.css: animations forbidden`);

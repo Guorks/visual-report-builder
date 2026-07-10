@@ -58,6 +58,29 @@ test("quoted values with spaces around = stay clean (negative control)", () => {
   assert.deepEqual(r, { errors: [], warnings: [] });
 });
 
+test("unclosed tag bypass: unterminated img/a produce errors (bypass probe)", () => {
+  assert.ok(lintInlineHtml(`intro <img src=y onerror="alert(1)"`, "p").errors.length >= 1);
+  assert.ok(lintInlineHtml(`click <a href="javascript:alert(1)"`, "p").errors.length >= 1);
+});
+
+test("renderReport throws InlineHtmlError on unterminated img tag in paragraph body", () => {
+  const bad = {
+    meta: { title: "t", language: "en", type: "status", audience: "engineers", date: "d", project: "p", footer_lines: ["f"] },
+    hero: { kicker: "k", h1_pre: "", h1_accent: "A", h1_post: "", lede: "l" },
+    sections: [{ kind: "paragraph", body: `intro <img src=y onerror="alert(document.domain)"` }],
+  };
+  assert.throws(() => renderReport(bad), InlineHtmlError);
+});
+
+test("negative controls: bare '<' in prose stays clean", () => {
+  assert.deepEqual(lintInlineHtml(`a < b`, "p"), { errors: [], warnings: [] });
+  assert.deepEqual(lintInlineHtml(`5 < 10`, "p"), { errors: [], warnings: [] });
+  assert.deepEqual(
+    lintInlineHtml(`price: $5 <span class="handwrite">cheap</span>`, "p"),
+    { errors: [], warnings: [] },
+  );
+});
+
 test("the canonical example lints clean (no errors)", () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const ir = JSON.parse(readFileSync(join(here, "../../../examples/tiktok-status-spanish/report.json"), "utf8"));

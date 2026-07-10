@@ -39,7 +39,9 @@ Dimensions:
 - audience_match — does the prose tone match the audience modifier
   (engineers terse, non-tech warm/analogy-heavy, etc.)?
 - image_prompt_quality — do figure captions and alt-text suggest images
-  that actually carry the section's information?
+  that actually carry the section's information? Penalize reports whose
+  content begged for a diagram, chart, or screenshot that isn't there,
+  and numeric data drawn as illustrations instead of chart nodes.
 - overall_craft — is this a report you'd be proud to ship?
 
 Respond with a single JSON object and nothing else:

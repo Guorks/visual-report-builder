@@ -8,6 +8,7 @@ export type Expected = {
   image_count_range?: [number, number];
   word_count_range?: [number, number];
   required_node_kinds?: string[];
+  max_custom_blocks?: number;
 };
 
 export type StructuralResult = {
@@ -75,6 +76,40 @@ function collectText(node: SectionNode, out: string[]): void {
     case "grid-3":
       for (const cell of node.cells) for (const inner of cell) collectText(inner, out);
       return;
+    case "callout":
+      if (node.title) out.push(node.title);
+      out.push(stripTags(node.body));
+      return;
+    case "stat-row":
+      for (const s of node.items) { out.push(s.value, s.label); if (s.note) out.push(s.note); }
+      return;
+    case "timeline":
+      for (const it of node.items) { out.push(it.time); if (it.title) out.push(it.title); out.push(stripTags(it.body)); }
+      return;
+    case "cta-card":
+      out.push(node.title, stripTags(node.body), node.action.label);
+      return;
+    case "action-list":
+      for (const a of node.items) { out.push(stripTags(a.text)); if (a.owner) out.push(a.owner); if (a.due) out.push(a.due); }
+      return;
+    case "quote":
+      out.push(node.text);
+      if (node.attribution) out.push(node.attribution);
+      return;
+    case "figure-row":
+      for (const f of node.figures) if (f.caption) out.push(f.caption);
+      return;
+    case "chart-bar":
+    case "chart-donut":
+      if (node.title) out.push(node.title);
+      for (const d of node.data) out.push(d.label);
+      if (node.caption) out.push(node.caption);
+      return;
+    case "custom":
+      out.push(stripTags(node.html));
+      return;
+    case "divider":
+      return;
   }
 }
 
@@ -94,6 +129,19 @@ export function countImages(report: Report): number {
   let n = 0;
   const walk = (node: SectionNode): void => {
     if (node.kind === "figure") n++;
+    if (node.kind === "figure-row") n += node.figures.length;
+    if (node.kind === "grid-2" || node.kind === "grid-3") {
+      for (const cell of node.cells) for (const inner of cell) walk(inner);
+    }
+  };
+  for (const s of report.sections) walk(s);
+  return n;
+}
+
+export function countCustomBlocks(report: Report): number {
+  let n = 0;
+  const walk = (node: SectionNode): void => {
+    if (node.kind === "custom") n++;
     if (node.kind === "grid-2" || node.kind === "grid-3") {
       for (const cell of node.cells) for (const inner of cell) walk(inner);
     }
@@ -163,6 +211,11 @@ export function evaluateStructural(
     for (const k of expected.required_node_kinds) {
       if (!kinds.has(k)) failures.push(`required node kind missing: ${k}`);
     }
+  }
+
+  if (expected.max_custom_blocks !== undefined) {
+    const n = countCustomBlocks(report);
+    if (n > expected.max_custom_blocks) failures.push(`custom_blocks=${n} exceeds max ${expected.max_custom_blocks}`);
   }
 
   return { passed: failures.length === 0, failures };

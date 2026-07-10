@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-10
 **Author:** Guorks Labs (drafted by Claude, from a comprehensive audit of `main` @ `4088c4e`)
-**Status:** Draft — pending review
+**Status:** Approved 2026-07-10 (owner resolved all open questions — see §9)
 **Supersedes nothing; builds on:** `2026-05-27-visual-report-builder-design.md` (v0.1) and the karpathy-pass v0.2 (typed IR + deterministic renderer + evals)
 
 ---
@@ -109,8 +109,10 @@ allowed inside a raw-html field. Consequences:
 3. Images become a first-class layout citizen: hero slot, sizes, aspect
    ratios, frameless mode, side-by-side rows — and the docs stop
    whispering "2-3 images."
-4. The single-file / offline story becomes true: an `embed` image mode
-   produces one self-contained HTML file.
+4. The sharing story matches reality: the primary use case is a report
+   shared as a URL (or a file opened on someone else's machine), so
+   figures resolve **CDN-first with local fallback** by default. No
+   multi-MB base64 embedding (rejected — see Resolved decisions §9.1).
 5. Numeric information renders as **real charts** (deterministic inline
    SVG in the hand-drawn aesthetic), not as hand-lettered numbers inside
    generated images. Generated illustrations carry *concepts*; charts
@@ -361,26 +363,34 @@ const CustomNode = z.object({
 
 ### 4.4 Images beyond the schema — pipeline changes
 
-1. **New render mode `--image-mode embed`** (F2): base64-encodes each
-   figure's local `src` into a `data:` URI. One genuinely
-   self-contained file, works offline, survives CDN link rot. Pipeline
-   docs re-point "shareable" at `embed`; `cdn` stays for size-sensitive
-   sharing (~2 credits ≈ ~1.5 MB PNG each; an 8-image embed report is
-   ~12 MB — document the tradeoff).
-2. **`cdn` mode warns** on stderr for every figure missing `src_cdn`
-   (F3). `--quiet` suppresses.
-3. **Fonts** (F1): add `--embed-fonts`, which inlines the four families
+1. **`cdn` becomes the default image mode** (F2): reports are shared as
+   URLs or handed to people who don't have the author's `assets/`
+   folder, so figures emit `src_cdn` (the Higgsfield CDN URL) when
+   present. Per-figure fallback to the local `src` stays (unchanged
+   renderer behavior, just the default flag flips). `--image-mode
+   local` remains for authoring/offline preview. Base64 `embed` mode is
+   **rejected** — multi-MB files defeat the share-a-URL use case
+   (decision §9.1).
+2. **The `cdn` default warns** on stderr for every figure missing
+   `src_cdn` (F3) — now default-mode behavior, so it matters more.
+   `--quiet` suppresses.
+3. **CDN link-rot risk, documented:** Higgsfield CDN URLs are not
+   guaranteed immortal. Mitigation is already structural: `report.json`
+   + `assets/` stay on the author's disk and in the image cache, so a
+   rotted report re-renders/re-uploads in one command. Pipeline docs
+   state this explicitly.
+4. **Fonts** (F1): add `--embed-fonts`, which inlines the four families
    as woff2 `data:` URIs from a checked-in `vendor/fonts/` (subset,
-   ~250 KB total). Default remains network fonts. Docs stop claiming
-   offline-correct rendering without it. (`embed` mode implies
-   `--embed-fonts`.)
-4. **Purge the stale caps:** rewrite the contradicting "2-3 images"
+   ~250 KB total). Default remains network fonts — consistent with the
+   CDN-first sharing model, which assumes a network anyway. Docs stop
+   claiming offline-correct rendering without the flag.
+5. **Purge the stale caps:** rewrite the contradicting "2-3 images"
    passages in `references/image-style-guide.md` (§ "The pipeline" step
    3) and align every doc with the v0.2 "let the report decide" rule
    (F11). Add positive guidance: decorative frameless doodles
    (`frame: false, width: small`) are cheap and encouraged for warmth;
    information-bearing figures still must earn their space.
-5. **Aspect-aware prompt guidance:** image-style-guide gains per-aspect
+6. **Aspect-aware prompt guidance:** image-style-guide gains per-aspect
    composition advice + the `aspect_ratio` API parameter table.
 
 ### 4.5 Chart nodes — data-driven, hand-drawn SVG
@@ -495,9 +505,9 @@ type; the LLM judge still scores audience match and craft.
    is appended, not interleaved). CI `cmp` guards this.
 2. **Unit tests** (extend `src/render/__tests__/`): one render test per
    new node; inline-lint accept/reject matrix (script, on*, javascript:,
-   unknown class, style url()); custom-node CSS namespacing; embed mode
-   produces zero external `src=` references; check-table ragged-row
-   rejection.
+   unknown class, style url()); custom-node CSS namespacing; cdn-default
+   emits `src_cdn` when present and warns per missing one; check-table
+   ragged-row rejection.
 3. **Structural eval:** `collectText`/`countImages`/`collectNodeKinds`
    extended to the new kinds (including `custom` word-count via
    tag-strip); new `max_custom_blocks` expectation.
@@ -533,7 +543,7 @@ type; the LLM judge still scores audience match and craft.
 | Phase | Contents |
 |---|---|
 | **P0 — unblocks the user's pain** | Tier-1 nodes + Figure flexibility + hero slots; `chart-bar` + `chart-donut` (§4.5); inline-lint (tier 2); `custom` node (tier 3); doc truth pass (SKILL.md, image-style-guide caps, design-system allowlist); eval extensions; unit tests |
-| **P1 — honest artifacts** | `chart-line`; `--image-mode embed`; cdn-mode warnings; `--validate`; CI workflow; print CSS; check-table refine; schema small-unlocks (F4/F6/F9) |
+| **P1 — honest artifacts** | `chart-line`; flip default image mode to `cdn` + missing-`src_cdn` warnings; `--validate`; CI workflow; print CSS; check-table refine; schema small-unlocks (F4/F6/F9) |
 | **P2 — nice-to-have** | `--embed-fonts` + vendored woff2; JSON Schema export; `custom` report type; cache prune pairing (F10) |
 
 ## 8. Risks
@@ -542,25 +552,25 @@ type; the LLM judge still scores audience match and craft.
 |---|---|
 | Agents overuse `custom` and the aesthetic drifts | mandatory `note`, trace event, eval counter, promotion rule, SKILL.md tier ordering |
 | Inline lint breaks old third-party reports | hard-fail list is tiny and unambiguous (JS vectors only); everything else warns |
-| Embed mode makes huge files | documented tradeoff; `cdn` mode retained; warn above ~15 MB |
+| Higgsfield CDN links rot → shared reports lose images | `report.json` + `assets/` + image cache persist locally; re-render/re-upload is one command; pipeline docs say to keep them |
 | Node vocabulary growth bloats renderer | each node is ~15 lines of primitives.ts; promotion rule keeps additions demand-driven |
 | Adding CSS changes the bytes of re-rendered old reports | Accepted: the determinism contract is "same IR + same renderer version → identical bytes," not stability across versions. CSS stays a static per-version string (no conditional emission); CI's double-render `cmp` guards the contract that matters. |
 
-## 9. Open questions
+## 9. Resolved decisions (owner review, 2026-07-10)
 
-1. Should `embed` become the *default* image mode (true single-file by
-   default) at the cost of file size? Current lean: keep `local` default,
-   make `embed` the documented "share this" mode.
-2. Vendored fonts add ~250 KB of binary to the repo — acceptable, or
-   fetch-and-cache at first `--embed-fonts` use? Current lean: vendor it;
-   determinism beats cleverness.
-3. Does `cta-card.action.href` need `https`-only enforcement like tier-2
-   links? Current lean: yes, same scheme allowlist.
-4. Chart style: hand-drawn rough strokes (roughjs, seeded — matches the
-   notebook aesthetic) vs. clean flat minimal SVG (crisper for investor
-   decks)? Current lean: rough by default; it's the skill's identity.
-   A per-chart `style: "clean"` override could come later if real
-   demand surfaces (YAGNI for now).
+1. **Image mode:** the primary use case is sharing a URL — recipients
+   never have the author's disk. Default flips to `cdn` (Higgsfield URL
+   first, local `src` as per-figure fallback). Base64 `embed` mode is
+   **rejected**: never ship the megabytes. `local` mode stays for
+   authoring/offline preview.
+2. **Fonts:** vendor the subset woff2 files in the repo (~250 KB) behind
+   `--embed-fonts`; determinism beats cleverness. Stays P2 — the
+   CDN-first model assumes a network, so this is low urgency.
+3. **CTA links:** yes — `cta-card.action.href` uses the same scheme
+   allowlist as tier-2 links (`https http mailto #`).
+4. **Chart style:** hand-drawn rough strokes (roughjs, seeded). It's the
+   skill's identity. A `style: "clean"` override only if someone
+   actually complains one day.
 
 ---
 

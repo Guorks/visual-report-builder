@@ -9,7 +9,8 @@
     "word_count_range": [700, 1800],
     "required_node_kinds": ["status-panel"],
     "tone_must_include_any_of": ["users", "operators", "team", "customer"],
-    "tone_must_avoid": ["schema", "edge function", "commit sha"]
+    "tone_must_avoid": ["schema", "edge function", "commit sha"],
+    "max_custom_blocks": 0
   },
   "snapshot_report_json": "../snapshots/status-non-tech-en.json"
 }

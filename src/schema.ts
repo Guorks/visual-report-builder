@@ -23,6 +23,23 @@ const Language = z.enum(["es", "en"]);
 const CardColor = z.enum(["green", "red", "blue", "yellow", "purple", "neutral"]);
 const BadgeKind = z.enum(["red", "gold", "green"]);
 
+const HREF_SCHEMES = /^(https?:\/\/|mailto:|#)/;
+
+export const Figure = z
+  .object({
+    src: z.string().min(1),
+    src_cdn: z.string().url().optional(),
+    alt: z.string().min(1),
+    caption: z.string().min(1).optional(),
+    width: z.enum(["full", "wide", "medium", "small"]).optional(),
+    aspect: z.enum(["16:9", "1:1", "4:3", "3:4", "9:16"]).optional(),
+    frame: z.boolean().optional(),
+    align: z.enum(["center", "left", "right"]).optional(),
+  })
+  .strict();
+
+const FigureNode = Figure.extend({ kind: z.literal("figure") }).strict();
+
 const Meta = z
   .object({
     title: z.string().min(1),
@@ -43,6 +60,10 @@ const Hero = z
     h1_accent: z.string().min(1),
     h1_post: z.string(),
     lede: z.string().min(1).describe("raw-html"),
+    badges: z
+      .array(z.object({ kind: BadgeKind, text: z.string().min(1) }).strict())
+      .min(1).max(3).optional(),
+    figure: Figure.optional(),
   })
   .strict();
 
@@ -60,16 +81,6 @@ const StatusPanelNode = z
       })
       .strict()
       .optional(),
-  })
-  .strict();
-
-const FigureNode = z
-  .object({
-    kind: z.literal("figure"),
-    src: z.string().min(1),
-    src_cdn: z.string().url().optional(),
-    alt: z.string().min(1),
-    caption: z.string().min(1),
   })
   .strict();
 
@@ -219,6 +230,138 @@ const BadgeRowNode = z
   })
   .strict();
 
+const CalloutNode = z
+  .object({
+    kind: z.literal("callout"),
+    color: CardColor,
+    icon: z.string().min(1).max(4).optional(),
+    title: z.string().min(1).optional(),
+    body: z.string().min(1).describe("raw-html"),
+  })
+  .strict();
+
+const StatRowNode = z
+  .object({
+    kind: z.literal("stat-row"),
+    items: z
+      .array(
+        z.object({
+          value: z.string().min(1),
+          label: z.string().min(1),
+          color: CardColor.optional(),
+          note: z.string().min(1).optional(),
+        }).strict(),
+      )
+      .min(2).max(4),
+  })
+  .strict();
+
+const TimelineNode = z
+  .object({
+    kind: z.literal("timeline"),
+    items: z
+      .array(
+        z.object({
+          time: z.string().min(1),
+          title: z.string().min(1).optional(),
+          body: z.string().min(1).describe("raw-html"),
+          color: CardColor.optional(),
+        }).strict(),
+      )
+      .min(2),
+  })
+  .strict();
+
+const CtaCardNode = z
+  .object({
+    kind: z.literal("cta-card"),
+    title: z.string().min(1),
+    body: z.string().min(1).describe("raw-html"),
+    action: z
+      .object({
+        label: z.string().min(1),
+        href: z.string().regex(HREF_SCHEMES, "href must start with https://, http://, mailto: or #").optional(),
+      })
+      .strict(),
+    color: CardColor.optional(),
+  })
+  .strict();
+
+const ActionListNode = z
+  .object({
+    kind: z.literal("action-list"),
+    items: z
+      .array(
+        z.object({
+          text: z.string().min(1).describe("raw-html"),
+          owner: z.string().min(1).optional(),
+          due: z.string().min(1).optional(),
+          done: z.boolean().optional(),
+        }).strict(),
+      )
+      .min(1),
+  })
+  .strict();
+
+const QuoteNode = z
+  .object({
+    kind: z.literal("quote"),
+    text: z.string().min(1),
+    attribution: z.string().min(1).optional(),
+  })
+  .strict();
+
+const FigureRowNode = z
+  .object({
+    kind: z.literal("figure-row"),
+    figures: z.array(Figure).min(2).max(3),
+  })
+  .strict();
+
+const DividerNode = z
+  .object({
+    kind: z.literal("divider"),
+    style: z.enum(["dashed", "scribble"]).optional(),
+  })
+  .strict();
+
+const ChartDatum = z
+  .object({
+    label: z.string().min(1),
+    value: z.number().finite().nonnegative(),
+    color: CardColor.optional(),
+  })
+  .strict();
+
+const ChartBarNode = z
+  .object({
+    kind: z.literal("chart-bar"),
+    title: z.string().min(1).optional(),
+    data: z.array(ChartDatum).min(2).max(8),
+    unit: z.string().optional(),
+    caption: z.string().min(1).optional(),
+  })
+  .strict();
+
+const ChartDonutNode = z
+  .object({
+    kind: z.literal("chart-donut"),
+    title: z.string().min(1).optional(),
+    data: z.array(ChartDatum).min(2).max(6),
+    center_label: z.string().min(1).optional(),
+    caption: z.string().min(1).optional(),
+  })
+  .strict();
+
+const CustomNode = z
+  .object({
+    kind: z.literal("custom"),
+    html: z.string().min(1),
+    css: z.string().min(1).optional(),
+    note: z.string().min(10),
+  })
+  .strict();
+
 type SectionNodeShape =
   | z.infer<typeof StatusPanelNode>
   | z.infer<typeof FigureNode>
@@ -238,6 +381,17 @@ type SectionNodeShape =
   | z.infer<typeof ScribbleNode>
   | z.infer<typeof TesterPillsNode>
   | z.infer<typeof BadgeRowNode>
+  | z.infer<typeof CalloutNode>
+  | z.infer<typeof StatRowNode>
+  | z.infer<typeof TimelineNode>
+  | z.infer<typeof CtaCardNode>
+  | z.infer<typeof ActionListNode>
+  | z.infer<typeof QuoteNode>
+  | z.infer<typeof FigureRowNode>
+  | z.infer<typeof DividerNode>
+  | z.infer<typeof ChartBarNode>
+  | z.infer<typeof ChartDonutNode>
+  | z.infer<typeof CustomNode>
   | { kind: "grid-2"; cells: [SectionNodeShape[], SectionNodeShape[]] }
   | { kind: "grid-3"; cells: [SectionNodeShape[], SectionNodeShape[], SectionNodeShape[]] };
 
@@ -261,6 +415,17 @@ const SectionNode: z.ZodType<SectionNodeShape> = z.lazy(() =>
     ScribbleNode,
     TesterPillsNode,
     BadgeRowNode,
+    CalloutNode,
+    StatRowNode,
+    TimelineNode,
+    CtaCardNode,
+    ActionListNode,
+    QuoteNode,
+    FigureRowNode,
+    DividerNode,
+    ChartBarNode,
+    ChartDonutNode,
+    CustomNode,
     Grid2Node,
     Grid3Node,
   ]),
@@ -319,4 +484,15 @@ export const NODE_KINDS = [
   "scribble",
   "tester-pills",
   "badge-row",
+  "callout",
+  "stat-row",
+  "timeline",
+  "cta-card",
+  "action-list",
+  "quote",
+  "figure-row",
+  "divider",
+  "chart-bar",
+  "chart-donut",
+  "custom",
 ] as const;

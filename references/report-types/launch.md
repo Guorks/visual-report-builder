@@ -36,7 +36,7 @@ try.
 
 Map each section in the recipe above to nodes in `src/schema.ts`:
 
-Hero = `figure`; what-is-it = `status-panel`; why-it-matters = `cards-3` (user/business/market); how-it-works = `figure` + `steps`; CTA = `card` color=purple; behind-the-scenes = `paragraph` + optional `cards-3`; credits = `cards-3`.
+Hero = `figure`; what-is-it = `status-panel`; why-it-matters = `cards-3` (user/business/market); how-it-works = `figure` + `steps`; CTA = `card` color=purple; behind-the-scenes = `paragraph` + optional `cards-3`; credits = `cards-3`; Try-it-now = `cta-card`; key metrics = `stat-row`; product hero = `hero.figure`.
 
 The renderer reads only the IR — never plain prose — so structural
 guarantees (section ordering, required node kinds) hold the moment the

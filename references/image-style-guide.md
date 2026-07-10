@@ -27,6 +27,26 @@ Substitute `[LANGUAGE]` with the report's language (`Spanish`, `English`,
 etc.). The hand-lettered labels respect the language so glyphs render
 correctly.
 
+## Aspect ratios (v0.3)
+
+16:9 is the default, not the law. Match aspect to composition and set the
+same value in the figure node's `aspect` field AND the API call:
+
+| Composition | aspect_ratio |
+|---|---|
+| Pipelines, flows, timelines | 16:9 |
+| Mascot portrait, single object, avatar | 1:1 |
+| Phone-screen mockups | 9:16 |
+| Tall checklists / stacked steps | 3:4 |
+
+## Charts are not images
+
+Numeric data (progress %, cost breakdowns, trends) renders via
+`chart-bar` / `chart-donut` nodes — computed SVG, exact values, zero
+credits. Never ask Higgsfield to draw a bar chart with real numbers;
+it garbles them and costs credits per retry. Decorative frameless
+doodles (`frame: false`, `width: "small"`) are cheap warmth — use them.
+
 ## The composition block
 
 After the boilerplate, add a `Composition:` block with 3-6 short bullets
@@ -78,7 +98,7 @@ When you reach the image-generation step:
 1. Call `mcp__claude_ai_higgsfield__balance` once — sanity-check credits.
 2. Call `mcp__claude_ai_higgsfield__generate_image` with `get_cost: true`
    on the first prompt — confirms model + price.
-3. Submit all 2-3 images in parallel (`generate_image` without `get_cost`).
+3. Submit all planned un-cached images in parallel (however many the report needs) (`generate_image` without `get_cost`).
 4. Poll each job with `job_status` and `sync: true` (each ~10-20s).
 5. Download every result to `<output_dir>/assets/<descriptive-slug>.png`
    via `curl`. **Keep the Higgsfield `rawUrl`** too — write it to the

@@ -9,7 +9,8 @@
     "word_count_range": [500, 1400],
     "required_node_kinds": ["check-table", "cards-2"],
     "tone_must_include_any_of": ["operador", "paso", "qué hacer", "cómo"],
-    "tone_must_avoid": ["sinérgico", "estratégico"]
+    "tone_must_avoid": ["sinérgico", "estratégico"],
+    "max_custom_blocks": 0
   },
   "snapshot_report_json": "../snapshots/comparison-operators-es.json"
 }

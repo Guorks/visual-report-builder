@@ -102,3 +102,37 @@ Captions below images are Caveat-font, italic-feeling, with an arrow prefix
 For the complete CSS, see `examples/tiktok-status-spanish/tiktok-integracion-estado.html`
 inline `<style>` block. The `references/base-html-template.html` is the
 generic version of that stylesheet, ready to copy into every new report.
+
+## New component classes (v0.3)
+
+| Class | Purpose |
+|---|---|
+| `.callout` + `.callout-<color>` | Colored callout (generalizes `.gotcha`) |
+| `.stat-row` / `.stat-tile` / `.stat-value` / `.stat-label` | KPI tiles |
+| `.timeline` / `.timeline-item` / `.timeline-time` | Timestamped timeline |
+| `.cta-card` / `.cta-button` | Call-to-action card with sketchy button |
+| `.action-list` / `.action-item` (+ `.done`) | Action items with owner pills |
+| `.quote` | Hand-lettered pull-quote |
+| `.figure-row` | 2-3 figures side by side |
+| `.divider-dashed` / `.divider-scribble` | Section dividers |
+| `.chart` / `.chart-legend` / `.chart-dot` | Hand-drawn SVG charts |
+| `.figure--wide/medium/small`, `.figure--noframe`, `.figure--left/right` | Figure layout modifiers |
+
+## Inline HTML allowlist (raw-html fields)
+
+Fields marked `raw-html` in `src/schema.ts` accept ONLY:
+- Tags: `strong em b i code a br small sub sup ul ol li span`
+- `class` values: `handwrite scribble err match tester-pill badge-red badge-gold badge-green`
+- `style` props: `font-size color text-align margin* padding*` (no `url()`)
+- `a href` schemes: `https://` `http://` `mailto:` `#`
+
+The renderer hard-fails (refuses to render) on: the tags `script style
+iframe object embed link meta img svg`; any `on*` event-handler
+attribute; `href` schemes outside `https:// http:// mailto: #` (so
+`javascript:` is rejected); `url(` or `expression` in a `style` value;
+and any unquoted attribute value. Off-list tags, classes, and style
+properties that are not in these hard-fail categories render with a
+warning. `--strict-html` promotes warnings to errors (CI mode). Literal
+`<`/`>` in raw-html or custom-CSS fields must be written as `&lt;`/`&gt;`
+entities; a bare `<` followed by a letter or `!` is rejected as an
+unterminated tag.

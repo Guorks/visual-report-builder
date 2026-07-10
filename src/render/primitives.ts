@@ -1,21 +1,9 @@
 import type { SectionNode } from "../schema.ts";
 import type { RenderOptions } from "./index.ts";
 
-const HTML_ESCAPES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-};
-
-export function escape(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c] ?? c);
-}
-
-function attr(s: string): string {
-  return s.replace(/[&<>"]/g, (c) => HTML_ESCAPES[c] ?? c);
-}
+import { escape, attr } from "./text.ts";
+import { renderChartBar, renderChartDonut } from "./charts.ts";
+export { escape };
 
 function tn(s: string): string {
   return `<span translate="no">${escape(s)}</span>`;
@@ -33,15 +21,8 @@ export function renderSection(node: SectionNode, opts: RenderOptions = {}): stri
       const cls = node.language ? ` class="language-${attr(node.language)}"` : "";
       return `<pre translate="no"><code${cls}>${escape(node.body)}</code></pre>`;
     }
-    case "figure": {
-      const src = opts.imageMode === "cdn" && node.src_cdn ? node.src_cdn : node.src;
-      return [
-        `<div class="figure">`,
-        `<img src="${attr(src)}" alt="${attr(node.alt)}">`,
-        `<div class="caption" translate="no">${escape(node.caption)}</div>`,
-        `</div>`,
-      ].join("");
-    }
+    case "figure":
+      return renderFigure(node, opts);
     case "status-panel": {
       const parts: string[] = [];
       parts.push(`<div class="status-panel">`);
@@ -154,5 +135,88 @@ export function renderSection(node: SectionNode, opts: RenderOptions = {}): stri
         .join("");
       return `<div class="${cls}">${cells}</div>`;
     }
+    case "callout": {
+      const icon = node.icon ? `<span class="callout-icon">${escape(node.icon)}</span>` : "";
+      const title = node.title ? `<strong translate="no">${escape(node.title)}</strong> ` : "";
+      return `<div class="callout callout-${node.color}">${icon}${title}<span translate="no">${node.body}</span></div>`;
+    }
+    case "stat-row": {
+      const tiles = node.items
+        .map((s) => {
+          const cls = s.color ? ` stat-${s.color}` : "";
+          const note = s.note ? `<div class="stat-note handwrite" translate="no">${escape(s.note)}</div>` : "";
+          return `<div class="stat-tile${cls}"><div class="stat-value" translate="no">${escape(s.value)}</div><div class="stat-label" translate="no">${escape(s.label)}</div>${note}</div>`;
+        })
+        .join("");
+      return `<div class="stat-row">${tiles}</div>`;
+    }
+    case "timeline": {
+      const items = node.items
+        .map((it) => {
+          const cls = it.color ? ` timeline-${it.color}` : "";
+          const title = it.title ? `<strong translate="no">${escape(it.title)}</strong> ` : "";
+          return `<li class="timeline-item${cls}"><span class="timeline-time" translate="no">${escape(it.time)}</span><span translate="no">${title}${it.body}</span></li>`;
+        })
+        .join("");
+      return `<ol class="timeline">${items}</ol>`;
+    }
+    case "cta-card": {
+      const cls = `cta-card ${node.color ?? "purple"}`;
+      const btn = node.action.href
+        ? `<a class="cta-button" href="${attr(node.action.href)}" translate="no">${escape(node.action.label)}</a>`
+        : `<span class="cta-button" translate="no">${escape(node.action.label)}</span>`;
+      return `<div class="${cls}"><h3 translate="no">${escape(node.title)}</h3><p translate="no">${node.body}</p>${btn}</div>`;
+    }
+    case "action-list": {
+      const items = node.items
+        .map((a) => {
+          const cls = a.done ? "action-item done" : "action-item";
+          const owner = a.owner ? ` <span class="tester-pill" translate="no">${escape(a.owner)}</span>` : "";
+          const due = a.due ? ` <small translate="no">${escape(a.due)}</small>` : "";
+          return `<li class="${cls}"><span translate="no">${a.text}</span>${owner}${due}</li>`;
+        })
+        .join("");
+      return `<ul class="action-list">${items}</ul>`;
+    }
+    case "quote": {
+      const cite = node.attribution ? `<cite translate="no">${escape(node.attribution)}</cite>` : "";
+      return `<blockquote class="quote"><p class="handwrite" translate="no">${escape(node.text)}</p>${cite}</blockquote>`;
+    }
+    case "figure-row": {
+      const figs = node.figures.map((f) => renderFigure(f, opts)).join("");
+      return `<div class="figure-row">${figs}</div>`;
+    }
+    case "divider":
+      return node.style === "scribble"
+        ? `<div class="divider divider-scribble" aria-hidden="true">~~~~~~~</div>`
+        : `<div class="divider divider-dashed" aria-hidden="true"></div>`;
+    case "chart-bar":
+      return renderChartBar(node);
+    case "chart-donut":
+      return renderChartDonut(node);
+    case "custom":
+      return `<div class="custom-block">${node.html}</div>`;
   }
+}
+
+export function renderFigure(
+  fig: {
+    src: string; src_cdn?: string; alt: string; caption?: string;
+    width?: "full" | "wide" | "medium" | "small";
+    aspect?: "16:9" | "1:1" | "4:3" | "3:4" | "9:16";
+    frame?: boolean;
+    align?: "center" | "left" | "right";
+  },
+  opts: RenderOptions = {},
+): string {
+  const src = opts.imageMode === "cdn" && fig.src_cdn ? fig.src_cdn : fig.src;
+  const classes = ["figure"];
+  if (fig.width && fig.width !== "full") classes.push(`figure--${fig.width}`);
+  if (fig.aspect && fig.aspect !== "16:9") classes.push(`figure--a-${fig.aspect.replace(":", "x")}`);
+  if (fig.frame === false) classes.push("figure--noframe");
+  if (fig.align && fig.align !== "center") classes.push(`figure--${fig.align}`);
+  const caption = fig.caption
+    ? `<div class="caption" translate="no">${escape(fig.caption)}</div>`
+    : "";
+  return `<div class="${classes.join(" ")}"><img src="${attr(src)}" alt="${attr(fig.alt)}">${caption}</div>`;
 }

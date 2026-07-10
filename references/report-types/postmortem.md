@@ -47,7 +47,7 @@ naming individuals.
 
 Map each section in the recipe above to nodes in `src/schema.ts`:
 
-Severity badge = `badge-row`; impact panel = `status-panel` (red-tinted via tag wording); timeline = `steps` with `small` for HH:MM; root cause = `paragraph` + optional `figure`; went well/poorly = `cards-2` green/red; action items = `pending-list`; lessons = `handwrite` or `scribble`; quick reference = `check-table`.
+Severity badge = `badge-row`; impact panel = `status-panel` (red-tinted via tag wording); timeline = `steps` with `small` for HH:MM; root cause = `paragraph` + optional `figure`; went well/poorly = `cards-2` green/red; action items = `pending-list`; lessons = `handwrite` or `scribble`; quick reference = `check-table`; incident timeline = `timeline` (HH:MM in `time`); action items = `action-list` (owner/due/done); severity badge = `hero.badges`; lessons learned = `callout` color=purple or `quote`.
 
 The renderer reads only the IR — never plain prose — so structural
 guarantees (section ordering, required node kinds) hold the moment the

@@ -7,9 +7,10 @@
     "section_titles_must_include": ["What is it", "Why it matters", "How it works"],
     "image_count_range": [1, 2],
     "word_count_range": [500, 1400],
-    "required_node_kinds": ["status-panel"],
+    "required_node_kinds": ["status-panel", "cta-card", "stat-row"],
     "tone_must_include_any_of": ["operators", "revenue", "growth", "milestone", "tam"],
-    "tone_must_avoid": ["debugged", "edge function"]
+    "tone_must_avoid": ["debugged", "edge function"],
+    "max_custom_blocks": 0
   },
   "snapshot_report_json": "../snapshots/launch-investors-en.json"
 }

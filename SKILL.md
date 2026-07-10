@@ -63,7 +63,7 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
 
 1. Clarify scope (one Q&A round if needed).
 2. Load report-type + audience-modifier + design-system + image-style-guide + schema.
-3. Plan however many images the report actually needs (no fixed cap — judge by content).
+3. Plan however many images the report actually needs (no fixed cap — judge by content). Numeric content gets chart nodes, not generated images — plan illustrations only for concepts.
 4. Preflight: check the image cache (`src/observability/cache.ts`), then Higgsfield balance + `get_cost: true` on the first un-cached prompt.
 5. Generate all un-cached images in parallel.
 6. Download to `<output_dir>/assets/`, store in cache via `store(prompt, model, path, credits, rawUrl)` — keep the `rawUrl`.
@@ -90,6 +90,15 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
 - **`translate="no"` on all dynamic text.** The renderer applies this
   automatically — you don't have to.
 - **Author = Guorks Labs** on any embedded credits/footer.
+- **Custom blocks are a last resort.** Order of preference: (1) a typed
+  node from `src/schema.ts`, (2) allowlisted inline markup inside a
+  raw-html field, (3) a `custom` node — which requires a `note`
+  explaining why nothing else fit. If you use the same custom shape in
+  two reports, stop and add it to `src/schema.ts` as a typed node.
+- **Data renders as charts, concepts as illustrations.** Percentages,
+  breakdowns, and trends use `chart-bar` / `chart-donut` / `stat-row`
+  (exact, free, regenerable). Higgsfield images are for metaphors,
+  flows, mascots — never for precise numbers.
 
 ## Failure recovery
 
@@ -114,7 +123,9 @@ from that, have a reason.
 
 ## Don't
 
-- Don't hand-write HTML; emit `report.json` and let the renderer produce it.
+- Don't hand-write documents. Inline markup inside raw-html fields is
+  limited to the allowlist in `references/design-system.md`; block-level
+  customization goes through the `custom` node (see Hard rules).
 - Don't redefine CSS classes that already exist in `src/render/css.ts`.
 - Don't generate images before deciding the structure (wastes credits).
 - Don't render code blocks for non-tech audiences (use prose instead).

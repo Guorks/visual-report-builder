@@ -102,3 +102,30 @@ Captions below images are Caveat-font, italic-feeling, with an arrow prefix
 For the complete CSS, see `examples/tiktok-status-spanish/tiktok-integracion-estado.html`
 inline `<style>` block. The `references/base-html-template.html` is the
 generic version of that stylesheet, ready to copy into every new report.
+
+## New component classes (v0.3)
+
+| Class | Purpose |
+|---|---|
+| `.callout` + `.callout-<color>` | Colored callout (generalizes `.gotcha`) |
+| `.stat-row` / `.stat-tile` / `.stat-value` / `.stat-label` | KPI tiles |
+| `.timeline` / `.timeline-item` / `.timeline-time` | Timestamped timeline |
+| `.cta-card` / `.cta-button` | Call-to-action card with sketchy button |
+| `.action-list` / `.action-item` (+ `.done`) | Action items with owner pills |
+| `.quote` | Hand-lettered pull-quote |
+| `.figure-row` | 2-3 figures side by side |
+| `.divider-dashed` / `.divider-scribble` | Section dividers |
+| `.chart` / `.chart-legend` / `.chart-dot` | Hand-drawn SVG charts |
+| `.figure--wide/medium/small`, `.figure--noframe`, `.figure--left/right` | Figure layout modifiers |
+
+## Inline HTML allowlist (raw-html fields)
+
+Fields marked `raw-html` in `src/schema.ts` accept ONLY:
+- Tags: `strong em b i code a br small sub sup ul ol li span`
+- `class` values: `handwrite scribble err match tester-pill badge-red badge-gold badge-green`
+- `style` props: `font-size color text-align margin* padding*` (no `url()`)
+- `a href` schemes: `https://` `http://` `mailto:` `#`
+
+The renderer hard-fails on `<script>`, `on*` attributes, `javascript:`
+URLs, and embeds. Anything else off-list renders with a warning.
+`--strict-html` turns warnings into errors (CI mode).

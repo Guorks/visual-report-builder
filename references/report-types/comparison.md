@@ -36,7 +36,7 @@ writing this. State the recommendation, then explain.
 
 Map each section in the recipe above to nodes in `src/schema.ts`:
 
-Fork figure = `figure`; resumen = `status-panel`; criteria = `check-table`; side-by-side = `cards-2` color green/red; recommendation = `card` color=purple or yellow; justification = `paragraph`; risks = `gotcha`; open questions = `pending-list`.
+Fork figure = `figure`; resumen = `status-panel`; criteria = `check-table`; side-by-side = `cards-2` color green/red; recommendation = `card` color=purple or yellow; justification = `paragraph`; risks = `gotcha`; open questions = `pending-list`; side-by-side visuals = `figure-row`; verdict metrics = `stat-row`.
 
 The renderer reads only the IR — never plain prose — so structural
 guarantees (section ordering, required node kinds) hold the moment the

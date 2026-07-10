@@ -34,7 +34,7 @@ decision memos ("we pivoted to Y").
 |---|---|
 | Hero `.lede` | A metric or milestone, framed as a sentence |
 | Executive panel | 3-5 KPIs front and center. Progress bar = % of quarter goal. |
-| Body sections | Charts > prose where possible. (We don't ship charts in v1; use the `.check-table` to show metrics over time.) |
+| Body sections | Lead with `stat-row` tiles and `chart-bar`/`chart-donut` — numbers as structure, not prose. |
 | Quick reference | Replace technical refs with KPI dashboard or financial summary links |
 
 ## Length

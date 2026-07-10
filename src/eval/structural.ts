@@ -28,7 +28,7 @@ function collectText(node: SectionNode, out: string[]): void {
       out.push(node.body);
       return;
     case "figure":
-      out.push(node.caption);
+      if (node.caption) out.push(node.caption);
       return;
     case "status-panel":
       out.push(node.tag, node.heading, stripTags(node.paragraph));

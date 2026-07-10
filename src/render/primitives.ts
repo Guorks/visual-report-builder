@@ -22,10 +22,13 @@ export function renderSection(node: SectionNode, opts: RenderOptions = {}): stri
     }
     case "figure": {
       const src = opts.imageMode === "cdn" && node.src_cdn ? node.src_cdn : node.src;
+      const caption = node.caption
+        ? `<div class="caption" translate="no">${escape(node.caption)}</div>`
+        : "";
       return [
         `<div class="figure">`,
         `<img src="${attr(src)}" alt="${attr(node.alt)}">`,
-        `<div class="caption" translate="no">${escape(node.caption)}</div>`,
+        caption,
         `</div>`,
       ].join("");
     }
@@ -141,5 +144,8 @@ export function renderSection(node: SectionNode, opts: RenderOptions = {}): stri
         .join("");
       return `<div class="${cls}">${cells}</div>`;
     }
+    default:
+      // v0.3 tier-1 node kinds: rendering lands in a follow-up task.
+      throw new Error(`renderSection: unhandled node kind "${node.kind}"`);
   }
 }

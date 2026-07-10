@@ -132,4 +132,7 @@ attribute; `href` schemes outside `https:// http:// mailto: #` (so
 `javascript:` is rejected); `url(` or `expression` in a `style` value;
 and any unquoted attribute value. Off-list tags, classes, and style
 properties that are not in these hard-fail categories render with a
-warning. `--strict-html` promotes warnings to errors (CI mode).
+warning. `--strict-html` promotes warnings to errors (CI mode). Literal
+`<`/`>` in raw-html or custom-CSS fields must be written as `&lt;`/`&gt;`
+entities; a bare `<` followed by a letter or `!` is rejected as an
+unterminated tag.

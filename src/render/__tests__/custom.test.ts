@@ -75,3 +75,11 @@ test("valid css with no angle brackets still renders", () => {
   const out = renderReport(withCustom(`<div class="x-a">a</div>`, `.x-a{color:var(--ink)}`));
   assert.ok(out.includes(`<style data-custom>.x-a{color:var(--ink)}</style>`));
 });
+
+test("child combinator '>' in custom css renders (S6: over-broad guard)", () => {
+  const out = renderReport(withCustom(
+    `<div class="x-a"><span class="x-b">a</span></div>`,
+    `.x-a > .x-b { color: var(--ink); }`,
+  ));
+  assert.ok(out.includes(`<style data-custom>.x-a > .x-b { color: var(--ink); }</style>`));
+});

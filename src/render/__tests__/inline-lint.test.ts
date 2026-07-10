@@ -81,6 +81,11 @@ test("negative controls: bare '<' in prose stays clean", () => {
   );
 });
 
+test("unterminated comment/CDATA openers are rejected (S3/S4 bypass probe)", () => {
+  assert.ok(lintInlineHtml(`intro <!-- foo`, "p").errors.length >= 1);
+  assert.ok(lintInlineHtml(`x <![CDATA[ y`, "p").errors.length >= 1);
+});
+
 test("the canonical example lints clean (no errors)", () => {
   const here = dirname(fileURLToPath(import.meta.url));
   const ir = JSON.parse(readFileSync(join(here, "../../../examples/tiktok-status-spanish/report.json"), "utf8"));

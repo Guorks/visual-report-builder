@@ -48,10 +48,12 @@ export function lintCustomNode(
   }
 
   if (node.css) {
-    // CSS legitimately never needs '<' or '>'; this is the emission-context
-    // guard that stops a custom.css payload from closing the renderer's
-    // <style data-custom> tag early and injecting a live <script> into <head>.
-    if (/[<>]/.test(node.css)) errors.push(`${path}.css: '<' or '>' are not allowed in custom CSS`);
+    // CSS legitimately never needs '<' (the child combinator '>' is a
+    // legitimate, common selector and is allowed); this is the
+    // emission-context guard that stops a custom.css payload from closing
+    // the renderer's <style data-custom> tag early — that breakout requires
+    // '<' (e.g. '</style>') — and injecting a live <script> into <head>.
+    if (/</.test(node.css)) errors.push(`${path}.css: '<' is not allowed in custom CSS`);
     if (/@import/i.test(node.css)) errors.push(`${path}.css: @import forbidden`);
     if (/position\s*:\s*fixed/i.test(node.css)) errors.push(`${path}.css: position: fixed forbidden`);
     if (/animation|@keyframes/i.test(node.css)) errors.push(`${path}.css: animations forbidden`);

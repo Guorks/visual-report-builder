@@ -42,12 +42,13 @@ export function findUnquotedAttrIssues(attrs: string, path: string): string[] {
 // so the linter would otherwise report zero errors while the browser forms the
 // element by consuming the renderer's own trailing template markup (e.g. the
 // </p> after a paragraph body). Strip well-formed tags, then reject any
-// residual '<' directly followed by a letter or '/' — that's an unterminated
-// tag opener. Legit prose '<' (a < b, 5 < 10, x <3) is never followed by a
-// letter or slash, so it's untouched.
+// residual '<' directly followed by a letter, '/', or '!' — that's an
+// unterminated tag opener, comment opener ('<!--'), or CDATA opener
+// ('<![CDATA['). Legit prose '<' (a < b, 5 < 10, x <3) is never followed by a
+// letter, slash, or '!', so it's untouched.
 export function findUnterminatedTag(html: string, path: string): string[] {
   const residual = html.replace(TAG_RE, "");
-  return /<\/?[a-zA-Z]/.test(residual) ? [`${path}: unterminated tag ('<' without a closing '>')`] : [];
+  return /<(\/?[a-zA-Z]|!)/.test(residual) ? [`${path}: unterminated tag ('<' without a closing '>')`] : [];
 }
 
 export function lintInlineHtml(html: string, path: string): LintResult {

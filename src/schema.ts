@@ -346,6 +346,26 @@ const ChartDonutNode = z
   })
   .strict();
 
+const ChartLineNode = z
+  .object({
+    kind: z.literal("chart-line"),
+    title: z.string().min(1).optional(),
+    series: z
+      .array(
+        z.object({
+          name: z.string().min(1),
+          color: CardColor.optional(),
+          points: z
+            .array(z.object({ x: z.string().min(1), y: z.number().finite() }).strict())
+            .min(2),
+        }).strict(),
+      )
+      .min(1).max(3),
+    unit: z.string().optional(),
+    caption: z.string().min(1).optional(),
+  })
+  .strict();
+
 const CustomNode = z
   .object({
     kind: z.literal("custom"),
@@ -384,6 +404,7 @@ type SectionNodeShape =
   | z.infer<typeof DividerNode>
   | z.infer<typeof ChartBarNode>
   | z.infer<typeof ChartDonutNode>
+  | z.infer<typeof ChartLineNode>
   | z.infer<typeof CustomNode>
   | { kind: "grid-2"; cells: [SectionNodeShape[], SectionNodeShape[]] }
   | { kind: "grid-3"; cells: [SectionNodeShape[], SectionNodeShape[], SectionNodeShape[]] };
@@ -418,6 +439,7 @@ const SectionNode: z.ZodType<SectionNodeShape> = z.lazy(() =>
     DividerNode,
     ChartBarNode,
     ChartDonutNode,
+    ChartLineNode,
     CustomNode,
     Grid2Node,
     Grid3Node,
@@ -499,5 +521,6 @@ export const NODE_KINDS = [
   "divider",
   "chart-bar",
   "chart-donut",
+  "chart-line",
   "custom",
 ] as const;

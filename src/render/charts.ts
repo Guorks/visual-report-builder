@@ -18,6 +18,9 @@ const rough = roughFactory as unknown as RoughFactory;
 type Datum = { label: string; value: number; color?: string };
 type BarNode = { title?: string; data: Datum[]; unit?: string; caption?: string };
 type DonutNode = { title?: string; data: Datum[]; center_label?: string; caption?: string };
+type LinePoint = { x: string; y: number };
+type LineSeries = { name: string; color?: string; points: LinePoint[] };
+type LineNode = { title?: string; series: LineSeries[]; unit?: string; caption?: string };
 
 const PALETTE = ["green", "blue", "purple", "yellow", "red"] as const;
 
@@ -99,6 +102,56 @@ export function renderChartDonut(node: DonutNode & { kind?: string }): string {
   const svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escape(node.title ?? "donut chart")}">${parts.join("")}</svg>`;
   const legend = `<div class="chart-legend">${node.data
     .map((d, i) => `<span class="chart-key"><span class="chart-dot" style="background: var(--${colorOf(d, i)})"></span><span translate="no">${escape(d.label)}</span> <span class="chart-key-value" translate="no">${escape(fmt(d.value))}</span></span>`)
+    .join("")}</div>`;
+  return wrap(svg, node.title, node.caption, legend);
+}
+
+export function renderChartLine(node: LineNode & { kind?: string }): string {
+  const W = 720, H = 340, PAD_L = 44, PAD_R = 20, PAD_T = 24, PAD_B = 52;
+  const g = rough.generator({ options: { seed: seedFor(node), roughness: 1.4, bowing: 1.2, stroke: "var(--ink)", strokeWidth: 2 } });
+  const innerW = W - PAD_L - PAD_R;
+  const innerH = H - PAD_T - PAD_B;
+
+  // x categories come from the first series; all series share the x axis
+  const xs = node.series[0]!.points.map((p) => p.x);
+  const allY = node.series.flatMap((s) => s.points.map((p) => p.y));
+  const maxY = Math.max(...allY, 1);
+  const minY = Math.min(...allY, 0);
+  const spanY = maxY - minY || 1;
+
+  const xAt = (i: number) => PAD_L + (xs.length === 1 ? innerW / 2 : (innerW * i) / (xs.length - 1));
+  const yAt = (y: number) => PAD_T + innerH - (innerH * (y - minY)) / spanY;
+
+  const parts: string[] = [];
+  // axes
+  parts.push(toSvgPaths(g, g.line(PAD_L, PAD_T, PAD_L, PAD_T + innerH)));
+  parts.push(toSvgPaths(g, g.line(PAD_L, PAD_T + innerH, W - PAD_R, PAD_T + innerH)));
+  // x labels
+  xs.forEach((x, i) => {
+    parts.push(`<text class="chart-label" x="${xAt(i)}" y="${PAD_T + innerH + 24}" text-anchor="middle">${escape(x)}</text>`);
+  });
+  // y min/max ticks
+  parts.push(`<text class="chart-value" x="${PAD_L - 8}" y="${yAt(maxY) + 4}" text-anchor="end">${escape(fmt(maxY, node.unit))}</text>`);
+  parts.push(`<text class="chart-value" x="${PAD_L - 8}" y="${yAt(minY) + 4}" text-anchor="end">${escape(fmt(minY, node.unit))}</text>`);
+  // one polyline per series
+  node.series.forEach((s, si) => {
+    const color = s.color && s.color !== "neutral" ? s.color : PALETTE[si % PALETTE.length]!;
+    const pts: [number, number][] = s.points.map((p, i) => [xAt(i), yAt(p.y)]);
+    parts.push(
+      g.toPaths(g.linearPath(pts, { stroke: `var(--${color})`, strokeWidth: 2.5 }))
+        .map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none"/>`)
+        .join(""),
+    );
+    // vertex dots
+    pts.forEach(([cx, cy]) => parts.push(`<circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--${color})" stroke="var(--ink)" stroke-width="1"/>`));
+  });
+
+  const svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escape(node.title ?? "line chart")}">${parts.join("")}</svg>`;
+  const legend = `<div class="chart-legend">${node.series
+    .map((s, si) => {
+      const color = s.color && s.color !== "neutral" ? s.color : PALETTE[si % PALETTE.length]!;
+      return `<span class="chart-key"><span class="chart-dot" style="background: var(--${color})"></span><span translate="no">${escape(s.name)}</span></span>`;
+    })
     .join("")}</div>`;
   return wrap(svg, node.title, node.caption, legend);
 }

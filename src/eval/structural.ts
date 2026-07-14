@@ -105,6 +105,11 @@ function collectText(node: SectionNode, out: string[]): void {
       for (const d of node.data) out.push(d.label);
       if (node.caption) out.push(node.caption);
       return;
+    case "chart-line":
+      if (node.title) out.push(node.title);
+      for (const s of node.series) { out.push(s.name); for (const p of s.points) out.push(p.x); }
+      if (node.caption) out.push(node.caption);
+      return;
     case "custom":
       out.push(stripTags(node.html));
       return;

@@ -2,7 +2,7 @@ import type { SectionNode } from "../schema.ts";
 import type { RenderOptions } from "./index.ts";
 
 import { escape, attr } from "./text.ts";
-import { renderChartBar, renderChartDonut } from "./charts.ts";
+import { renderChartBar, renderChartDonut, renderChartLine } from "./charts.ts";
 export { escape };
 
 function tn(s: string): string {
@@ -194,6 +194,8 @@ export function renderSection(node: SectionNode, opts: RenderOptions = {}): stri
       return renderChartBar(node);
     case "chart-donut":
       return renderChartDonut(node);
+    case "chart-line":
+      return renderChartLine(node);
     case "custom":
       return `<div class="custom-block">${node.html}</div>`;
   }

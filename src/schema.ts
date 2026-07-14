@@ -455,6 +455,22 @@ const SectionNode: z.ZodType<SectionNodeShape> = z.lazy(() =>
         }
       });
     }
+    if (node.kind === "chart-line") {
+      const ref = node.series[0]!.points;
+      node.series.forEach((s, i) => {
+        if (i === 0) return;
+        const mismatched =
+          s.points.length !== ref.length ||
+          s.points.some((p, j) => p.x !== ref[j]!.x);
+        if (mismatched) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["series", i, "points"],
+            message: "all series must share the same x categories (same count and x values in order)",
+          });
+        }
+      });
+    }
   }),
 );
 

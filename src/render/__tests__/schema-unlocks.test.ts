@@ -37,3 +37,51 @@ test("card node and cards-2 share the Card shape (both still validate)", () => {
     { kind: "cards-2", cards: [{ color: "red", body: "x" }, { color: "blue", body: "y" }] },
   ]));
 });
+
+const chartLine = (seriesPoints: Array<Array<{ x: string; y: number }>>) => ({
+  kind: "chart-line",
+  title: "Views over time",
+  series: seriesPoints.map((points, i) => ({ name: `s${i}`, points })),
+});
+
+test("chart-line accepts series that share the same x categories", () => {
+  Report.parse(wrap([
+    chartLine([
+      [{ x: "W1", y: 10 }, { x: "W2", y: 40 }, { x: "W3", y: 30 }],
+      [{ x: "W1", y: 5 }, { x: "W2", y: 15 }, { x: "W3", y: 45 }],
+    ]),
+  ]));
+});
+
+test("chart-line rejects series with different point counts", () => {
+  assert.throws(() => Report.parse(wrap([
+    chartLine([
+      [{ x: "W1", y: 10 }, { x: "W2", y: 40 }, { x: "W3", y: 30 }],
+      [{ x: "W1", y: 5 }, { x: "W2", y: 15 }],
+    ]),
+  ])));
+});
+
+test("chart-line rejects series with same count but different x values", () => {
+  assert.throws(() => Report.parse(wrap([
+    chartLine([
+      [{ x: "W1", y: 10 }, { x: "W2", y: 40 }, { x: "W3", y: 30 }],
+      [{ x: "W1", y: 5 }, { x: "W4", y: 15 }, { x: "W3", y: 45 }],
+    ]),
+  ])));
+});
+
+test("chart-line mismatch is caught when nested inside a grid-2 cell", () => {
+  assert.throws(() => Report.parse(wrap([
+    {
+      kind: "grid-2",
+      cells: [
+        [chartLine([
+          [{ x: "W1", y: 10 }, { x: "W2", y: 40 }],
+          [{ x: "W1", y: 5 }, { x: "W2", y: 15 }, { x: "W3", y: 45 }],
+        ])],
+        [{ kind: "paragraph", body: "p" }],
+      ],
+    },
+  ])));
+});

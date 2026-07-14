@@ -25,6 +25,7 @@ jobs:
         run: npx tsx bin/render.ts examples/tiktok-status-spanish/report.json --validate --strict-html
       - name: Structural evals (missing snapshots allowed; real failures are not)
         run: |
+          # eval exits 3 when only missing-snapshot entries remain (expected until snapshots are authored); 1=structural/tone fail, 2=judge fail — those must fail CI
           code=0
           npx tsx bin/eval.ts || code=$?
           if [ "$code" = "3" ]; then echo "only missing-snapshot entries — treated as pass"; exit 0; fi

@@ -457,4 +457,16 @@ a.cta-button { border-bottom: 2px solid var(--ink); }
 .chart-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-block; }
 .chart-key-value { font-family: 'JetBrains Mono', monospace; }
 
-.custom-block { margin: 20px 0; }`;
+.custom-block { margin: 20px 0; }
+
+@media print {
+  :root { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  body { background: var(--paper); }
+  .wrap { max-width: 100%; padding: 0 12px; }
+  .card, .status-panel, .figure, .cta-card, .callout, .chart, .quote, .stat-tile, table.check-table {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+  }
+  h2, h3 { break-after: avoid; }
+  a { color: var(--ink); }
+}`;

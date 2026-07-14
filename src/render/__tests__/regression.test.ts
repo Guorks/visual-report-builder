@@ -16,7 +16,7 @@ function extractBody(html: string): string {
 }
 
 test("TikTok example body bytes are stable", () => {
-  assert.equal(extractBody(renderReport(exampleIR)), golden);
+  assert.equal(extractBody(renderReport(exampleIR, { imageMode: "local" })), golden);
 });
 
 test("rendering is deterministic (full document, double render)", () => {

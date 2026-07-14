@@ -76,7 +76,7 @@ const StatusPanelNode = z
     progress: z
       .object({
         pct: z.number().min(0).max(100),
-        labels: z.array(z.string().min(1)).length(4),
+        labels: z.array(z.string().min(1)).min(2).max(6),
         note: z.string().min(1).describe("raw-html"),
       })
       .strict()
@@ -121,14 +121,7 @@ const Card = z
   })
   .strict();
 
-const CardNode = z
-  .object({
-    kind: z.literal("card"),
-    color: CardColor,
-    title: z.string().optional(),
-    body: z.string().min(1).describe("raw-html"),
-  })
-  .strict();
+const CardNode = Card.extend({ kind: z.literal("card") }).strict();
 
 const Cards2Node = z
   .object({
@@ -353,6 +346,26 @@ const ChartDonutNode = z
   })
   .strict();
 
+const ChartLineNode = z
+  .object({
+    kind: z.literal("chart-line"),
+    title: z.string().min(1).optional(),
+    series: z
+      .array(
+        z.object({
+          name: z.string().min(1),
+          color: CardColor.optional(),
+          points: z
+            .array(z.object({ x: z.string().min(1), y: z.number().finite() }).strict())
+            .min(2),
+        }).strict(),
+      )
+      .min(1).max(3),
+    unit: z.string().optional(),
+    caption: z.string().min(1).optional(),
+  })
+  .strict();
+
 const CustomNode = z
   .object({
     kind: z.literal("custom"),
@@ -391,6 +404,7 @@ type SectionNodeShape =
   | z.infer<typeof DividerNode>
   | z.infer<typeof ChartBarNode>
   | z.infer<typeof ChartDonutNode>
+  | z.infer<typeof ChartLineNode>
   | z.infer<typeof CustomNode>
   | { kind: "grid-2"; cells: [SectionNodeShape[], SectionNodeShape[]] }
   | { kind: "grid-3"; cells: [SectionNodeShape[], SectionNodeShape[], SectionNodeShape[]] };
@@ -425,10 +439,39 @@ const SectionNode: z.ZodType<SectionNodeShape> = z.lazy(() =>
     DividerNode,
     ChartBarNode,
     ChartDonutNode,
+    ChartLineNode,
     CustomNode,
     Grid2Node,
     Grid3Node,
-  ]),
+  ]).superRefine((node, ctx) => {
+    if (node.kind === "check-table") {
+      node.rows.forEach((row, i) => {
+        if (row.length !== node.headers.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["rows", i],
+            message: `row has ${row.length} cells but headers has ${node.headers.length}`,
+          });
+        }
+      });
+    }
+    if (node.kind === "chart-line") {
+      const ref = node.series[0]!.points;
+      node.series.forEach((s, i) => {
+        if (i === 0) return;
+        const mismatched =
+          s.points.length !== ref.length ||
+          s.points.some((p, j) => p.x !== ref[j]!.x);
+        if (mismatched) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["series", i, "points"],
+            message: "all series must share the same x categories (same count and x values in order)",
+          });
+        }
+      });
+    }
+  }),
 );
 
 const Grid2Node = z
@@ -494,5 +537,6 @@ export const NODE_KINDS = [
   "divider",
   "chart-bar",
   "chart-donut",
+  "chart-line",
   "custom",
 ] as const;

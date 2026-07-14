@@ -1,0 +1,32 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Tests
+        run: npm test
+      - name: Determinism (byte-identical double render)
+        run: |
+          npx tsx bin/render.ts examples/tiktok-status-spanish/report.json --image-mode local --out /tmp/a.html
+          npx tsx bin/render.ts examples/tiktok-status-spanish/report.json --image-mode local --out /tmp/b.html
+          cmp /tmp/a.html /tmp/b.html
+      - name: Example lints clean (strict)
+        run: npx tsx bin/render.ts examples/tiktok-status-spanish/report.json --validate --strict-html
+      - name: Structural evals (missing snapshots allowed; real failures are not)
+        run: |
+          # eval exits 3 when only missing-snapshot entries remain (expected until snapshots are authored); 1=structural/tone fail, 2=judge fail — those must fail CI
+          code=0
+          npx tsx bin/eval.ts || code=$?
+          if [ "$code" = "3" ]; then echo "only missing-snapshot entries — treated as pass"; exit 0; fi
+          exit "$code"

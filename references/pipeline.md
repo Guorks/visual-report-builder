@@ -29,6 +29,7 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous.
 | "A vs B" / "compare" / "which option" | comparison |
 | "decided" / "we picked" / "decision memo" | decision-memo |
 | "when user does X" / "user story" / "given/when/then" / "behavior" | user-story |
+| none of the above / bespoke | custom |
 
 ## Step 2 — Load context files
 

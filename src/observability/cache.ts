@@ -80,10 +80,28 @@ export function prune(maxAgeDays: number): { pruned: number; remaining: number }
   ensureDir(CACHE_ROOT);
   const cutoff = Date.now() - maxAgeDays * 24 * 60 * 60 * 1000;
   let pruned = 0;
+  // get all unique hashes from .json files
+  const hashes = new Set<string>();
   for (const f of readdirSync(CACHE_ROOT)) {
-    const full = join(CACHE_ROOT, f);
-    if (statSync(full).mtimeMs < cutoff) {
-      unlinkSync(full);
+    if (f.endsWith(".json")) {
+      const hash = f.replace(".json", "");
+      hashes.add(hash);
+    }
+  }
+  // judge each pair by the NEWER file's mtime; delete both if past cutoff
+  for (const hash of hashes) {
+    const png = join(CACHE_ROOT, `${hash}.png`);
+    const json = join(CACHE_ROOT, `${hash}.json`);
+    // skip if either file is missing (don't crash)
+    if (!existsSync(png) || !existsSync(json)) continue;
+    // get max mtime of the pair
+    const pngMtime = statSync(png).mtimeMs;
+    const jsonMtime = statSync(json).mtimeMs;
+    const maxMtime = Math.max(pngMtime, jsonMtime);
+    // delete both if past cutoff
+    if (maxMtime < cutoff) {
+      unlinkSync(png);
+      unlinkSync(json);
       pruned++;
     }
   }

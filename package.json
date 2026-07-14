@@ -12,7 +12,7 @@
     "render": "tsx bin/render.ts",
     "eval": "tsx bin/eval.ts",
     "cache": "tsx bin/cache.ts",
-    "test": "node --import tsx --test src/render/__tests__/*.test.ts",
+    "test": "node --import tsx --test src/**/__tests__/*.test.ts",
     "regenerate-template": "tsx bin/regenerate-template.ts"
   },
   "dependencies": {

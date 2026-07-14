@@ -12,6 +12,7 @@
     "render": "tsx bin/render.ts",
     "eval": "tsx bin/eval.ts",
     "cache": "tsx bin/cache.ts",
+    "schema": "tsx bin/schema.ts",
     "test": "node --import tsx --test src/**/__tests__/*.test.ts",
     "regenerate-template": "tsx bin/regenerate-template.ts"
   },
@@ -19,7 +20,8 @@
     "@anthropic-ai/sdk": "^0.40.0",
     "roughjs": "^4.6.6",
     "tsx": "^4.20.0",
-    "zod": "^3.24.0"
+    "zod": "^3.24.0",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

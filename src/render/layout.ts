@@ -2,10 +2,18 @@ import type { Report } from "../schema.ts";
 import type { RenderOptions } from "./index.ts";
 import { CSS } from "./css.ts";
 import { escape, renderSection, renderFigure } from "./primitives.ts";
+import { embeddedFontCss } from "./fonts.ts";
 
 const FONTS_LINK = `<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">`;
 
-export function renderHead(report: Report, customCss = ""): string {
+export function renderHead(report: Report, customCss = "", opts: RenderOptions = {}): string {
+  const fontTags = opts.embedFonts
+    ? [`<style>${embeddedFontCss()}</style>`]
+    : [
+        `<link rel="preconnect" href="https://fonts.googleapis.com">`,
+        `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
+        FONTS_LINK,
+      ];
   return [
     `<!doctype html>`,
     `<html lang="${escape(report.meta.language)}">`,
@@ -13,9 +21,7 @@ export function renderHead(report: Report, customCss = ""): string {
     `<meta charset="utf-8">`,
     `<meta name="viewport" content="width=device-width, initial-scale=1">`,
     `<title>${escape(report.meta.title)}</title>`,
-    `<link rel="preconnect" href="https://fonts.googleapis.com">`,
-    `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>`,
-    FONTS_LINK,
+    ...fontTags,
     `<style>${CSS}</style>`,
     ...(customCss ? [`<style data-custom>${customCss}</style>`] : []),
     `</head>`,
@@ -69,7 +75,7 @@ export function renderFooter(report: Report): string {
 export function renderDocument(report: Report, opts: RenderOptions = {}, customCss = ""): string {
   const sections = report.sections.map((s) => renderSection(s, opts)).join("\n");
   return [
-    renderHead(report, customCss),
+    renderHead(report, customCss, opts),
     `<body>`,
     `<div class="wrap">`,
     renderHero(report, opts),

@@ -110,24 +110,25 @@ For every `figure` node, set both fields when you have them:
 }
 ```
 
-`src` is the local relative path (offline-portable default). `src_cdn`
+`src` is the local relative path (offline-authoring fallback). `src_cdn`
 is optional — include it whenever the rawUrl is available so the report
-can also render in CDN mode without re-authoring.
+renders shareable-by-URL by default without re-authoring.
 
 Render with one of two modes:
 
 ```bash
-# default: local — offline-portable, ships with the assets/ folder
+# default: cdn — single-file HTML, shareable by URL (images load from src_cdn)
 npx tsx bin/render.ts <output_dir>/report.json --out <output_dir>/<slug>.html
 
-# CDN: single-file HTML, images load from Higgsfield (or wherever src_cdn points)
-npx tsx bin/render.ts <output_dir>/report.json --out <output_dir>/<slug>.shared.html --image-mode cdn
+# local: offline-authoring/preview, ships with the assets/ folder
+npx tsx bin/render.ts <output_dir>/report.json --out <output_dir>/<slug>.local.html --image-mode local
 ```
 
 The renderer is deterministic *per mode*: same JSON + same mode = byte-
 identical HTML out. It validates the IR against the zod schema. Schema
-violations exit non-zero with the offending path. In `cdn` mode, figures
-without `src_cdn` silently fall back to `src` (no error).
+violations exit non-zero with the offending path. In `cdn` mode, a figure
+without `src_cdn` falls back to `src` and the renderer emits a warning
+(not an error — `--strict-html` still renders).
 
 Hard rules from the design system:
 - No `any` JS — there is no JS at all. Pure HTML + inline CSS.

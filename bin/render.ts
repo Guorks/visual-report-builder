@@ -24,11 +24,11 @@ function fail(msg: string, code = 1): never {
 function parseArgs(argv: string[]): { input: string; out?: string; imageMode: ImageMode; strictHtml: boolean } {
   const args = argv.slice(2);
   if (args.length === 0) {
-    fail("usage: tsx bin/render.ts <report.json> [--out <path>] [--image-mode local|cdn] [--strict-html]", 2);
+    fail("usage: tsx bin/render.ts <report.json> [--out <path>] [--image-mode local|cdn (default cdn)] [--strict-html]", 2);
   }
   let input: string | undefined;
   let out: string | undefined;
-  let imageMode: ImageMode = "local";
+  let imageMode: ImageMode = "cdn";
   let strictHtml = false;
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;

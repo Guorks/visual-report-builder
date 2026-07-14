@@ -8,6 +8,7 @@ const ReportType = z.enum([
   "comparison",
   "decision-memo",
   "user-story",
+  "custom",
 ]);
 
 const Audience = z.enum([

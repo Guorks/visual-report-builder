@@ -21,15 +21,16 @@ function fail(msg: string, code = 1): never {
   process.exit(code);
 }
 
-function parseArgs(argv: string[]): { input: string; out?: string; imageMode: ImageMode; strictHtml: boolean; validate: boolean } {
+function parseArgs(argv: string[]): { input: string; out?: string; imageMode: ImageMode; strictHtml: boolean; embedFonts: boolean; validate: boolean } {
   const args = argv.slice(2);
   if (args.length === 0) {
-    fail("usage: tsx bin/render.ts <report.json> [--out <path>] [--image-mode local|cdn (default cdn)] [--strict-html] [--validate]", 2);
+    fail("usage: tsx bin/render.ts <report.json> [--out <path>] [--image-mode local|cdn (default cdn)] [--strict-html] [--embed-fonts] [--validate]", 2);
   }
   let input: string | undefined;
   let out: string | undefined;
   let imageMode: ImageMode = "cdn";
   let strictHtml = false;
+  let embedFonts = false;
   let validate = false;
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
@@ -46,6 +47,8 @@ function parseArgs(argv: string[]): { input: string; out?: string; imageMode: Im
       imageMode = v;
     } else if (a === "--strict-html") {
       strictHtml = true;
+    } else if (a === "--embed-fonts") {
+      embedFonts = true;
     } else if (a === "--validate") {
       validate = true;
     } else if (!input) {
@@ -55,10 +58,10 @@ function parseArgs(argv: string[]): { input: string; out?: string; imageMode: Im
     }
   }
   if (!input) fail("missing input path", 2);
-  return { input, out, imageMode, strictHtml, validate };
+  return { input, out, imageMode, strictHtml, embedFonts, validate };
 }
 
-const { input, out, imageMode, strictHtml, validate } = parseArgs(process.argv);
+const { input, out, imageMode, strictHtml, embedFonts, validate } = parseArgs(process.argv);
 const inputPath = resolve(input);
 let raw: unknown;
 try {
@@ -72,6 +75,7 @@ try {
   html = renderReport(raw, {
     imageMode,
     strictHtml,
+    embedFonts,
     onWarning: (w) => process.stderr.write(`warn: ${w}\n`),
   });
 } catch (e) {

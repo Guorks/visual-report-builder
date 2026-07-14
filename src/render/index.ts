@@ -7,6 +7,7 @@ export type ImageMode = "local" | "cdn";
 export type RenderOptions = {
   imageMode?: ImageMode;
   strictHtml?: boolean;
+  embedFonts?: boolean;
   onWarning?: (msg: string) => void;
 };
 

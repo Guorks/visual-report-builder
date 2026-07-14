@@ -100,6 +100,16 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
   (exact, free, regenerable). Higgsfield images are for metaphors,
   flows, mascots — never for precise numbers.
 
+## CLI Options
+
+- `--embed-fonts` — inlines all 4 report fonts as data URIs, producing a truly offline single file. Default is network fonts.
+- `--validate` — schema-validates the report IR before rendering.
+- `npm run schema` (or `npx tsx bin/schema.ts`) — emits the JSON Schema for the Report IR for editor/tooling validation.
+
+## Report types
+
+The 7 named recipe types are: `status`, `postmortem`, `kickoff`, `launch`, `comparison`, `decision-memo`, `user-story`. Use the `custom` report type for bespoke reports that fit none of these shapes — state your section recipe in one sentence in `meta.extra` (see `references/report-types/custom.md`).
+
 ## Failure recovery
 
 - Higgsfield job fails → retry once with same prompt. If still fails,

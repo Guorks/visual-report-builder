@@ -191,7 +191,7 @@ export function evaluateStructural(
     failures.push(`meta.language expected=${expected.language} actual=${report.meta.language}`);
   }
 
-  if (expected.section_titles_must_include) {
+  if (expected.section_titles_must_include && report.meta.type !== "custom") {
     const titles = collectSectionTitles(report);
     for (const req of expected.section_titles_must_include) {
       const found = titles.some((t) => t.toLowerCase().includes(req.toLowerCase()));

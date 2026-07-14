@@ -21,15 +21,16 @@ function fail(msg: string, code = 1): never {
   process.exit(code);
 }
 
-function parseArgs(argv: string[]): { input: string; out?: string; imageMode: ImageMode; strictHtml: boolean } {
+function parseArgs(argv: string[]): { input: string; out?: string; imageMode: ImageMode; strictHtml: boolean; validate: boolean } {
   const args = argv.slice(2);
   if (args.length === 0) {
-    fail("usage: tsx bin/render.ts <report.json> [--out <path>] [--image-mode local|cdn (default cdn)] [--strict-html]", 2);
+    fail("usage: tsx bin/render.ts <report.json> [--out <path>] [--image-mode local|cdn (default cdn)] [--strict-html] [--validate]", 2);
   }
   let input: string | undefined;
   let out: string | undefined;
   let imageMode: ImageMode = "cdn";
   let strictHtml = false;
+  let validate = false;
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
     if (a === "--out") {
@@ -45,6 +46,8 @@ function parseArgs(argv: string[]): { input: string; out?: string; imageMode: Im
       imageMode = v;
     } else if (a === "--strict-html") {
       strictHtml = true;
+    } else if (a === "--validate") {
+      validate = true;
     } else if (!input) {
       input = a;
     } else {
@@ -52,10 +55,10 @@ function parseArgs(argv: string[]): { input: string; out?: string; imageMode: Im
     }
   }
   if (!input) fail("missing input path", 2);
-  return { input, out, imageMode, strictHtml };
+  return { input, out, imageMode, strictHtml, validate };
 }
 
-const { input, out, imageMode, strictHtml } = parseArgs(process.argv);
+const { input, out, imageMode, strictHtml, validate } = parseArgs(process.argv);
 const inputPath = resolve(input);
 let raw: unknown;
 try {
@@ -83,6 +86,11 @@ try {
     fail(`inline html violations:\n${issues}`);
   }
   fail(`render failed: ${(e as Error).message}`);
+}
+
+if (validate) {
+  process.stdout.write(`valid: ${inputPath}\n`);
+  process.exit(0);
 }
 
 const outPath = out

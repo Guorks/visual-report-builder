@@ -108,7 +108,7 @@ Infer **report type** from the topic. Only ask if genuinely ambiguous
 
 ## Report types
 
-The 7 named recipe types are: `status`, `postmortem`, `kickoff`, `launch`, `comparison`, `decision`, `story`. Use `custom` for bespoke reports that fit none of these shapes; requires a `note` in the IR explaining the deviation.
+The 7 named recipe types are: `status`, `postmortem`, `kickoff`, `launch`, `comparison`, `decision-memo`, `user-story`. Use the `custom` report type for bespoke reports that fit none of these shapes — state your section recipe in one sentence in `meta.extra` (see `references/report-types/custom.md`).
 
 ## Failure recovery
 

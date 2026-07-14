@@ -76,7 +76,7 @@ const StatusPanelNode = z
     progress: z
       .object({
         pct: z.number().min(0).max(100),
-        labels: z.array(z.string().min(1)).length(4),
+        labels: z.array(z.string().min(1)).min(2).max(6),
         note: z.string().min(1).describe("raw-html"),
       })
       .strict()
@@ -121,14 +121,7 @@ const Card = z
   })
   .strict();
 
-const CardNode = z
-  .object({
-    kind: z.literal("card"),
-    color: CardColor,
-    title: z.string().optional(),
-    body: z.string().min(1).describe("raw-html"),
-  })
-  .strict();
+const CardNode = Card.extend({ kind: z.literal("card") }).strict();
 
 const Cards2Node = z
   .object({
@@ -428,7 +421,19 @@ const SectionNode: z.ZodType<SectionNodeShape> = z.lazy(() =>
     CustomNode,
     Grid2Node,
     Grid3Node,
-  ]),
+  ]).superRefine((node, ctx) => {
+    if (node.kind === "check-table") {
+      node.rows.forEach((row, i) => {
+        if (row.length !== node.headers.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["rows", i],
+            message: `row has ${row.length} cells but headers has ${node.headers.length}`,
+          });
+        }
+      });
+    }
+  }),
 );
 
 const Grid2Node = z
